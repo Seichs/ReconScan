@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="https://ibb.co/jvzDVS6g" width="300" alt="ReconScan Logo">
+[![raw.png](https://i.postimg.cc/VkvCn7PB/raw.png)](https://postimg.cc/bZXrj9Js)
 </p>
 
 <h1 align="center">ReconScan</h1>
@@ -88,7 +88,7 @@ python3 scripts/scan.py --target https://testsite.local --ai
 ReconScan can optionally trigger **deface payloads** during controlled Command Injection or XSS attacks (e.g., replacing HTML with this styled warning page):
 
 <p align="center">
-  <img src="https://ibb.co/v487nSSF" width="500">
+[![image.png](https://i.postimg.cc/028m2kt4/image.png)](https://postimg.cc/9znzLhHP)
 </p>
 
 ---
