@@ -7,8 +7,8 @@ class CLIInterface:
 | |\ \  __/ (_| (_) | | | /\__/ / (_| (_| | | | |
 \_| \_\___|\___\___/|_| |_\____/ \___\__,_|_| |_|
 
-                            [:: ReconScan ::]
-             Web Application Vulnerability Scanner
+              [:: ReconScan ::]
+     Web Application Vulnerability Scanner
 """
 
         self.commands = {
