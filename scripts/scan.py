@@ -35,3 +35,11 @@ class CLIInterface:
                 print(f"Executing '{user_input}'...")  # Hook in real logic here
             else:
                 print("Unknown command.")
+
+def main():
+    cli = CLIInterface()
+    cli.display()
+    cli.prompt()
+
+if __name__ == "__main__":
+    main()
