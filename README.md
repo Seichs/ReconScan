@@ -55,7 +55,7 @@ ReconScan/
 ## 🛠️ Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ReconScan.git
+git clone https://github.com/Seichs/ReconScan.git
 cd ReconScan
 python3 -m venv venv
 source venv/bin/activate
