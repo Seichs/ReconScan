@@ -7,6 +7,6 @@ class ExitCommand:
     example = "exit"
     category = "Utilities"
     
-    def execute(self):
+    def execute(self, args=None):
         print("Exiting ReconScan. Stay secure.")
         return True  # Signal to break the loop
