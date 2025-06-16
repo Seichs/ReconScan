@@ -1,0 +1,129 @@
+# ReconScan System Configuration
+# Static settings for system-level configuration and defaults
+# These settings are typically set once and rarely changed during runtime
+
+# Application information
+app:
+  name: "ReconScan"
+  version: "1.0.0-dev"
+  build: "alpha"
+  author: "Security Team"
+  description: "Web Application Vulnerability Scanner"
+
+# System requirements and compatibility
+system:
+  min_python_version: "3.8"
+  max_memory_usage: "2GB"
+  max_concurrent_scans: 5
+  default_encoding: "utf-8"
+  temp_dir: "temp"
+
+# File paths and directories
+paths:
+  payloads_dir: "config/payloads"
+  wordlists_dir: "data/wordlists"
+  reports_dir: "reports"
+  logs_dir: "logs"
+  temp_dir: "temp"
+  custom_modules_dir: "scanner/custom"
+
+# Module configuration and defaults
+modules:
+  # Modules enabled by default
+  enabled_by_default:
+    - "sql_injection"
+    - "xss"
+    - "lfi"
+    - "command_injection"
+    - "headers"
+  
+  # Modules disabled by default (experimental or high-risk)
+  disabled_by_default:
+    - "experimental_module"
+    - "destructive_tests"
+  
+  # Auto-load custom modules from custom_modules_dir
+  auto_load_custom: true
+  
+  # Module loading timeout (seconds)
+  load_timeout: 30
+
+# Default payload configurations
+payload_defaults:
+  sql_injection:
+    default_level: "basic"          # basic, medium, advanced
+    time_based_delay: 5             # seconds
+    error_based_enabled: true
+    blind_enabled: true
+    union_enabled: true
+  
+  xss:
+    default_encoding: "standard"     # standard, advanced, all
+    dom_testing: true
+    stored_testing: true
+    reflected_testing: true
+  
+  command_injection:
+    default_os: "auto"              # auto, linux, windows, both
+    time_based_delay: 3
+    blind_enabled: true
+  
+  lfi:
+    directory_traversal: true
+    wrapper_testing: true
+    filter_bypass: true
+
+# Integration settings for external tools
+integrations:
+  burp_suite:
+    enabled: false
+    api_url: "http://127.0.0.1:1337"
+    api_key: null
+  
+  metasploit:
+    enabled: false
+    rpc_host: "127.0.0.1"
+    rpc_port: 55553
+  
+  custom_tools:
+    enabled: false
+    tools_path: "/opt/security-tools"
+
+# Default network and scanning behavior
+defaults:
+  network:
+    timeout: 10
+    user_agent: "ReconScan/1.0"
+    max_redirects: 5
+    verify_ssl: false
+    retry_attempts: 3
+  
+  scanning:
+    threads: 5
+    delay: 0.5
+    deep_scan: false
+    follow_redirects: true
+    scan_timeout: 300
+    max_urls: 1000
+  
+  output:
+    verbose: true
+    save_responses: false
+    report_format: "json"
+    log_level: "INFO"
+    color_output: true
+
+# Wordlist and dictionary settings
+wordlists:
+  default_dirs: "common_directories.txt"
+  default_files: "common_files.txt"
+  default_params: "common_parameters.txt"
+  custom_wordlists_enabled: true
+
+# Security and safety settings
+security:
+  max_payload_size: "10MB"
+  dangerous_functions_check: true
+  safe_mode: false
+  whitelist_enabled: false
+  blacklist_enabled: true

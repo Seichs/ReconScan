@@ -26,13 +26,16 @@ class HelpCommand:
         """Initialize help command with dynamic command loading."""
         # Import here to avoid circular imports
         from scanner.commands.registry import CommandRegistry
+        from scanner.config_loader import get_system_config
+        
         self.registry = CommandRegistry()
         
-        # FIXME: Hardcoded version info - should read from config
+        # Load version info from system configuration
+        self.system_config = get_system_config()
         self.version_info = {
-            'version': '1.0.0-dev',
-            'build': 'alpha',
-            'python_req': '3.8+'
+            'version': self.system_config.get_version(),
+            'build': self.system_config.get_build(),
+            'python_req': self.system_config.get_python_requirement()
         }
     
     def execute(self, args=None):
@@ -64,7 +67,7 @@ class HelpCommand:
     def _show_general_help(self):
         """Display comprehensive help overview."""
         print("\n" + "="*60)
-        print("RECON SCAN - Web Application Security Scanner")
+        print("RECONSCAN - Web Application Security Scanner")
         print("="*60)
         print(f"Version: {self.version_info['version']} ({self.version_info['build']})")
         print(f"Python: {self.version_info['python_req']} | Current: {sys.version.split()[0]}")
