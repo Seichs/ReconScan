@@ -47,12 +47,20 @@ class CLIInterface:
 
     def prompt(self):
         while True:
-            user_input = input("ReconScan> ").strip().lower()
+            user_input = input("ReconScan> ").strip()
             
-            if self.registry.has_command(user_input):
-                result = self.registry.execute(user_input)
+            if not user_input:
+                continue
+                
+            # Parse command and arguments
+            parts = user_input.split(None, 1)  # Split into max 2 parts
+            command = parts[0].lower()
+            args = parts[1] if len(parts) > 1 else None
+            
+            if self.registry.has_command(command):
+                result = self.registry.execute(command, args)
                 # Special handling for exit command
-                if user_input == "exit" and result:
+                if command == "exit" and result:
                     break
             else:
                 print("Unknown command.")

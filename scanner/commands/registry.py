@@ -49,11 +49,11 @@ class CommandRegistry:
             'category': getattr(command_class, 'category', 'Uncategorized')
         }
     
-    def execute(self, command_name):
-        """Execute a command by name"""
+    def execute(self, command_name, args=None):
+        """Execute a command by name with optional arguments"""
         if command_name in self.commands:
             command_instance = self.commands[command_name]()
-            return command_instance.execute()
+            return command_instance.execute(args)
         return False
     
     def list_commands(self):
