@@ -22,7 +22,7 @@ class ConfigCommand:
     # Command metadata - self-documenting for help system
     description = "Configure scanner settings and preferences"
     usage = "config [show|set|reset] [setting] [value]"
-    example = "config set proxy http://127.0.0.1:8080"
+    example = "config set network.proxy http://127.0.0.1:8080"
     category = "Configuration"
     
     def __init__(self):
@@ -125,7 +125,8 @@ class ConfigCommand:
                 print("Usage: config [show|set|reset] [setting] [value]")
                 print("Examples:")
                 print("  config show")
-                print("  config set proxy http://127.0.0.1:8080")
+                print("  config set network.proxy http://127.0.0.1:8080")
+                print("  config set scanning.threads 10")
                 print("  config reset")
                 return False
                 
@@ -241,7 +242,7 @@ class ConfigCommand:
             # Parse setting path (e.g., "network.proxy")
             if "." not in setting:
                 print(f"Invalid setting format. Use 'category.setting' format.")
-                print("Example: network.proxy or scanning.threads")
+                print("Examples: network.proxy, scanning.threads, output.verbose")
                 return False
             
             category, setting_name = setting.split(".", 1)

@@ -92,6 +92,7 @@ integrations:
 # Default network and scanning behavior
 defaults:
   network:
+    proxy: null
     timeout: 10
     user_agent: "ReconScan/1.0"
     max_redirects: 5
