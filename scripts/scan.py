@@ -1,6 +1,11 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Add project root to path if needed
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from scanner.commands.registry import CommandRegistry
 
 class CLIInterface:
@@ -19,30 +24,20 @@ class CLIInterface:
 
         # Initialize the command registry
         self.registry = CommandRegistry()
-        
-        # Define command descriptions for display
-        self.command_descriptions = {
-            "scan": "Run a scan against a target URL",
-            "config": "Edit or view the scan configuration", 
-            "report": "View or generate reports",
-            "exit": "Exit the program",
-            "help": "Show help information",
-            "status": "Show scanner status",
-            "clear": "Clear the screen",
-            "payloads": "Manage payloads",
-            "modules": "Manage scan modules",
-            "deface": "Website defacement tools",
-            "set": "Set configuration options",
-            "run": "Run specific operations"
-        }
 
     def display(self):
         print(self.banner)
         print("Available commands:")
-        available_commands = self.registry.list_commands()
-        for cmd in available_commands:
-            desc = self.command_descriptions.get(cmd, "No description available")
-            print(f"  {cmd:<10} - {desc}")
+        
+        # Get commands organized by category from registry
+        commands_by_category = self.registry.get_commands_by_category()
+        
+        for category, commands in commands_by_category.items():
+            print(f"\n{category}:")
+            for cmd in commands:
+                metadata = self.registry.get_command_metadata(cmd)
+                print(f"  {cmd:<10} - {metadata['description']}")
+        
         print("\nType a command to begin:")
 
     def prompt(self):

@@ -5,7 +5,6 @@ Provides comprehensive help information for all available commands,
 usage examples, and system status information.
 """
 
-import os
 import sys
 
 class HelpCommand:
@@ -88,8 +87,9 @@ class HelpCommand:
         print("\n" + "-" * 40)
         print("USAGE:")
         print("  * Type 'help <command>' for detailed command information")
-        print("  * Type 'status' to check system readiness")
-        print("  * Type 'config show' to view current settings")
+        print("  * Type 'status' to display system status and configuration")
+        print("  * Type 'set proxy http://proxy' for config changes")
+        print("  * Type 'status --verbose' for detailed system information")
         
         # TODO: Add recent scan statistics
         # TODO: Add system health check indicators

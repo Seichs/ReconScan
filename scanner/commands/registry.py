@@ -93,8 +93,4 @@ class CommandRegistry:
             categories[category].append(cmd_name)
         return categories
 
-# TODO: Feature to implement later
-# FIXME: Known issue that needs addressing  
-# HACK: Temporary solution, needs refactoring
-# NOTE: Important implementation detail
-# WARNING: Security consideration 
+ 

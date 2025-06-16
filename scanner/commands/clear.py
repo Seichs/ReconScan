@@ -49,9 +49,6 @@ class ClearCommand:
         """Display the ReconScan home screen by reusing CLI display logic."""
         try:
             # Import and use the existing CLI display logic
-            import sys
-            import os
-            sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             from scripts.scan import CLIInterface
             
             # Create CLI instance and use its display method
