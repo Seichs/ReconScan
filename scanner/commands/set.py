@@ -136,13 +136,13 @@ class SetCommand:
                 return False
             
             # Extract setting and value
-            setting = parts[0]
+            original_setting = parts[0]
             value = " ".join(parts[1:])  # Join remaining parts for values with spaces
             
             # Resolve shorthand to full setting name
-            full_setting = self._resolve_setting(setting)
+            full_setting = self._resolve_setting(original_setting)
             
-            return self._set_config(full_setting, value)
+            return self._set_config(full_setting, value, original_setting)
             
         except Exception as e:
             print(f"Error executing set command: {str(e)}")
@@ -219,13 +219,14 @@ class SetCommand:
                 merged[category] = settings
         return merged
     
-    def _set_config(self, setting, value):
+    def _set_config(self, setting, value, original_setting=None):
         """
         Set a configuration value with validation.
         
         Args:
             setting (str): Setting name in format 'category.setting'
             value (str): New value to set
+            original_setting (str, optional): Original setting name user typed
             
         Returns:
             bool: True if setting was successful
@@ -273,8 +274,9 @@ class SetCommand:
             # Save to file
             self._save_config(self.config)
             
-            # Confirm change
-            print(f"Set {setting} = {new_value}")
+            # Confirm change using original setting name if provided
+            display_setting = original_setting if original_setting else setting
+            print(f"Set {display_setting} = {new_value}")
             return True
             
         except KeyError:
