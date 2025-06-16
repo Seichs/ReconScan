@@ -117,11 +117,18 @@ class ConfigCommand:
                 setting = parts[1]
                 value = " ".join(parts[2:])  # Join remaining parts for values with spaces
                 return self._set_config(setting, value)
+            elif action == "set":
+                # Improved error message for incomplete set command
+                print("Error: Incomplete set command.")
+                print("Usage: config set <category.setting> <value>")
+
+
+                return False
             elif action == "reset":
                 return self._reset_config()
             else:
                 # Invalid command format
-                print("Invalid config command format.")
+                print("Error: Invalid config command.")
                 print("Usage: config [show|set|reset] [setting] [value]")
                 print("Examples:")
                 print("  config show")
@@ -264,7 +271,14 @@ class ConfigCommand:
             new_value = self._convert_value(value, type(old_value))
             
             if new_value is None and value.lower() not in ["none", "null", ""]:
-                print(f"Invalid value '{value}' for setting '{setting}'.")
+                print(f"Error: Invalid value '{value}' for setting '{category}.{setting_name}'.")
+                print(f"Expected type: {type(old_value).__name__}")
+                if type(old_value) == bool:
+                    print("Valid boolean values: true, false, 1, 0, yes, no")
+                elif type(old_value) == int:
+                    print("Expected: whole number (e.g., 10, 5, 100)")
+                elif type(old_value) == float:
+                    print("Expected: decimal number (e.g., 1.5, 0.5, 2.0)")
                 return False
             
             # Update configuration
@@ -277,6 +291,21 @@ class ConfigCommand:
             print(f"Set {category}.{setting_name} = {new_value}")
             return True
             
+        except KeyError:
+            print(f"Error: Setting '{setting}' not found.")
+            
+            # Suggest available categories if category exists
+            if '.' in setting:
+                category = setting.split('.')[0]
+                if category in self.config:
+                    available_settings = list(self.config[category].keys())
+                    print(f"Available settings in '{category}': {', '.join(available_settings)}")
+                else:
+                    print(f"Available categories: {', '.join(self.config.keys())}")
+            else:
+                print(f"Available categories: {', '.join(self.config.keys())}")
+                print("Use format: category.setting (e.g., network.proxy)")
+            return False
         except Exception as e:
             print(f"Error setting configuration: {e}")
             return False
