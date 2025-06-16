@@ -1,6 +1,6 @@
 class CLIInterface:
     def __init__(self):
-        self.banner = r"""
+        self.banner = """
 \033[93m     
 | ___ \                   /  ___|
 | |_/ /___  ___ ___  _ __ \ `--.  ___ __ _ _ __
