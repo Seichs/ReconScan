@@ -1,3 +1,5 @@
+from scanner.commands.registry import CommandRegistry
+
 class CLIInterface:
     def __init__(self):
         self.banner = """
@@ -12,28 +14,43 @@ class CLIInterface:
 \033[90m     Web Application Vulnerability Scanner\033[0m
 """
 
-        self.commands = {
+        # Initialize the command registry
+        self.registry = CommandRegistry()
+        
+        # Define command descriptions for display
+        self.command_descriptions = {
             "scan": "Run a scan against a target URL",
-            "config": "Edit or view the scan configuration",
+            "config": "Edit or view the scan configuration", 
             "report": "View or generate reports",
-            "exit": "Exit the program"
+            "exit": "Exit the program",
+            "help": "Show help information",
+            "status": "Show scanner status",
+            "clear": "Clear the screen",
+            "payloads": "Manage payloads",
+            "modules": "Manage scan modules",
+            "deface": "Website defacement tools",
+            "set": "Set configuration options",
+            "run": "Run specific operations"
         }
 
     def display(self):
         print(self.banner)
         print("Available commands:")
-        for cmd, desc in self.commands.items():
+        available_commands = self.registry.list_commands()
+        for cmd in available_commands:
+            desc = self.command_descriptions.get(cmd, "No description available")
             print(f"  {cmd:<10} - {desc}")
         print("\nType a command to begin:")
 
     def prompt(self):
         while True:
             user_input = input("ReconScan> ").strip().lower()
-            if user_input == "exit":
-                print("Exiting ReconScan. Stay secure.")
-                break
-            elif user_input in self.commands:
-                print(f"Executing '{user_input}'...")  # Hook in real logic here
+            
+            if self.registry.has_command(user_input):
+                result = self.registry.execute(user_input)
+                # Special handling for exit command
+                if user_input == "exit" and result:
+                    break
             else:
                 print("Unknown command.")
 
