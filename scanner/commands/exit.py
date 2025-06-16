@@ -29,7 +29,5 @@ class ExitCommand:
         # Clear the terminal to remove all traces of ReconScan session
         os.system('clear')
         
-        # Display clean exit message
-        print("Exiting ReconScan. Stay secure.")
-        
+        # Silent exit - no message to maintain complete OpSec
         return True  # Signal to break the loop
