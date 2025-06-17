@@ -1,0 +1,80 @@
+/* RESET & BASE STYLES */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    background-color: #0b0b0c;
+    color: #ff3b3b;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* MAIN CONTAINER (WIDER) */
+.wrapper {
+    width: 90%;
+    max-width: 960px; /* Increased from 600px */
+    min-width: 360px;
+    padding: 4rem 3rem;
+    border: 1px solid #ff3b3b;
+    background-color: #121212;
+    color: #ff3b3b;
+    border-radius: 12px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* HEADLINE */
+.wrapper h1 {
+    font-size: 2.8rem;
+    margin-bottom: 2rem;
+    font-weight: bold;
+    border-bottom: 2px solid #ff3b3b;
+    padding-bottom: 1rem;
+}
+
+/* TEXT CONTENT */
+.wrapper p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #ff7a7a;
+}
+
+.wrapper strong {
+    color: #ff3b3b;
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (max-width: 768px) {
+    .wrapper {
+        padding: 3rem 2rem;
+    }
+
+    .wrapper h1 {
+        font-size: 2.2rem;
+    }
+
+    .wrapper p {
+        font-size: 1.05rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wrapper {
+        padding: 2rem 1.2rem;
+    }
+
+    .wrapper h1 {
+        font-size: 1.8rem;
+    }
+
+    .wrapper p {
+        font-size: 1rem;
+    }
+}

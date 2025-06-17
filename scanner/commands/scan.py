@@ -11,7 +11,10 @@ import time
 import urllib.parse
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from urllib.parse import urlparse, urlencode, urlunparse, parse_qs, urljoin
+from datetime import datetime
 import json
+import re
 
 class ScanCommand:
     """
@@ -282,9 +285,6 @@ class ScanCommand:
         
         try:
             # Parse base URL
-            from urllib.parse import urljoin, urlparse, parse_qs
-            import re
-            
             base_parsed = urlparse(target)
             base_domain = f"{base_parsed.scheme}://{base_parsed.netloc}"
             
@@ -441,7 +441,6 @@ class ScanCommand:
         
         for base_url in urls_to_test:
             # Parse URL to extract parameters
-            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
             parsed_url = urlparse(base_url)
             params_dict = parse_qs(parsed_url.query)
             
@@ -592,19 +591,19 @@ class ScanCommand:
                             payload.upper()
                         ]
                         
-                                                 if any(var in content for var in payload_variations):
-                             vulnerability = {
-                                 'type': 'Cross-Site Scripting (XSS)',
-                                 'severity': 'Medium',
-                                 'url': test_url,
-                                 'payload': payload,
-                                 'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
-                             }
-                             if self._add_vulnerability(vulnerability):
-                                 vulnerabilities_found += 1
-                                 if verbose:
-                                     print(f"     XSS vulnerability found: {param}={payload}")
-                             break
+                        if any(var in content for var in payload_variations):
+                            vulnerability = {
+                                'type': 'Cross-Site Scripting (XSS)',
+                                'severity': 'Medium',
+                                'url': test_url,
+                                'payload': payload,
+                                'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
+                            }
+                            if self._add_vulnerability(vulnerability):
+                                vulnerabilities_found += 1
+                                if verbose:
+                                    print(f"     XSS vulnerability found: {param}={payload}")
+                            break
                             
                 except Exception as e:
                     if verbose:
@@ -805,7 +804,7 @@ class ScanCommand:
                         if self._add_vulnerability(vulnerability):
                             vulnerabilities_found += 1
                             if verbose:
-                                print(f"    ✗ Directory traversal found: {payload}")
+                                print(f"     Directory traversal found: {payload}")
                         break
                         
             except Exception as e:
