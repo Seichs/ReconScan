@@ -17,6 +17,7 @@ class ReportCommand:
     
     Provides capabilities to view scan results, filter vulnerabilities,
     export reports in different formats, and manage result files.
+    Also handles report generation from scan results.
     """
     
     # Command metadata - self-documenting for help system
@@ -93,8 +94,8 @@ class ReportCommand:
     def _list_reports(self):
         """List all available report files with basic information."""
         try:
-            # Find all JSON report files
-            report_files = list(self.reports_dir.glob("*.json"))
+            # Find all TXT report files
+            report_files = list(self.reports_dir.glob("*.txt"))
             
             if not report_files:
                 print("No report files found in reports directory")
@@ -107,17 +108,28 @@ class ReportCommand:
             
             for report_file in sorted(report_files):
                 try:
-                    with open(report_file, 'r') as f:
-                        data = json.load(f)
-                    
-                    # Extract basic information
-                    scan_info = data.get('scan_info', {})
-                    summary = data.get('summary', {})
+                    # Extract basic info from text file
+                    with open(report_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
                     
                     file_name = report_file.name
-                    scan_date = scan_info.get('start_time', 'Unknown')
-                    target = scan_info.get('target', 'Unknown')
-                    vuln_count = summary.get('total_vulnerabilities', 0)
+                    
+                    # Parse basic information from text format
+                    target = 'Unknown'
+                    scan_date = 'Unknown'
+                    vuln_count = 0
+                    
+                    lines = content.split('\n')
+                    for line in lines:
+                        if line.startswith('Target URL      :'):
+                            target = line.split(':', 1)[1].strip()
+                        elif line.startswith('Scan Date       :'):
+                            scan_date = line.split(':', 1)[1].strip()
+                        elif line.startswith('Total Vulnerabilities Found:'):
+                            try:
+                                vuln_count = int(line.split(':')[1].strip())
+                            except:
+                                vuln_count = 0
                     
                     print(f"{file_name:<30} {scan_date:<20} {target:<25} {vuln_count:<15}")
                     
@@ -520,6 +532,182 @@ class ReportCommand:
             print(f"Error comparing reports: {str(e)}")
             return False
     
+    @staticmethod
+    def generate_text_report(scan_results, output_path):
+        """
+        Generate a professional formatted text report from scan results.
+        
+        Args:
+            scan_results (dict): Scan results data
+            output_path (Path): Output file path
+        """
+        with open(output_path, 'w', encoding='utf-8') as f:
+            scan_info = scan_results['scan_info']
+            vulnerabilities = scan_results['vulnerabilities']
+            summary = scan_results['summary']
+            
+            # Header section
+            f.write("=" * 80 + "\n")
+            f.write("                      RECONSCAN VULNERABILITY REPORT\n")
+            f.write("=" * 80 + "\n\n")
+            
+            # Scan information
+            f.write("SCAN INFORMATION\n")
+            f.write("-" * 40 + "\n")
+            f.write(f"Target URL      : {scan_info.get('target', 'Unknown')}\n")
+            f.write(f"Scan Date       : {scan_info.get('start_time', 'Unknown')}\n")
+            f.write(f"Duration        : {scan_info.get('duration', 'Unknown')}\n")
+            f.write(f"Scanner Version : {scan_info.get('scanner_version', 'Unknown')}\n")
+            f.write(f"Modules Used    : {', '.join(scan_info.get('modules', []))}\n\n")
+            
+            # Executive summary
+            f.write("EXECUTIVE SUMMARY\n")
+            f.write("-" * 40 + "\n")
+            total_vulns = summary.get('total_vulnerabilities', 0)
+            f.write(f"Total Vulnerabilities Found: {total_vulns}\n\n")
+            
+            if total_vulns > 0:
+                # Severity breakdown
+                severity_counts = summary.get('by_severity', {})
+                f.write("Severity Breakdown:\n")
+                for severity in ['Critical', 'High', 'Medium', 'Low']:
+                    count = severity_counts.get(severity, 0)
+                    if count > 0:
+                        status_icon = "🔴" if severity == 'Critical' else "🟠" if severity == 'High' else "🟡" if severity == 'Medium' else "🟢"
+                        f.write(f"  {status_icon} {severity:<10}: {count} vulnerabilities\n")
+                
+                f.write("\n")
+                
+                # Risk assessment
+                f.write("RISK ASSESSMENT\n")
+                f.write("-" * 40 + "\n")
+                critical_count = severity_counts.get('Critical', 0)
+                high_count = severity_counts.get('High', 0)
+                
+                if critical_count > 0:
+                    f.write("🔴 CRITICAL RISK: Immediate action required!\n")
+                    f.write(f"   {critical_count} critical vulnerabilities detected that could lead to\n")
+                    f.write("   complete system compromise.\n\n")
+                elif high_count > 0:
+                    f.write("🟠 HIGH RISK: Urgent remediation needed.\n")
+                    f.write(f"   {high_count} high-severity vulnerabilities could allow significant\n")
+                    f.write("   unauthorized access or data exposure.\n\n")
+                else:
+                    f.write("🟡 MODERATE RISK: Address vulnerabilities in planned maintenance.\n\n")
+                
+                # Vulnerability types
+                type_counts = summary.get('by_type', {})
+                if type_counts:
+                    f.write("Vulnerability Types:\n")
+                    for vuln_type, count in sorted(type_counts.items()):
+                        f.write(f"  • {vuln_type}: {count}\n")
+                    f.write("\n")
+            else:
+                f.write("✅ No vulnerabilities detected in this scan.\n")
+                f.write("   The target appears to be properly secured against\n")
+                f.write("   the tested attack vectors.\n\n")
+            
+            # Detailed findings
+            if vulnerabilities:
+                f.write("DETAILED VULNERABILITY FINDINGS\n")
+                f.write("=" * 80 + "\n\n")
+                
+                # Group by severity for better organization
+                for severity in ['Critical', 'High', 'Medium', 'Low']:
+                    severity_vulns = [v for v in vulnerabilities if v.get('severity') == severity]
+                    if not severity_vulns:
+                        continue
+                    
+                    f.write(f"{severity.upper()} SEVERITY VULNERABILITIES\n")
+                    f.write("-" * 50 + "\n\n")
+                    
+                    for i, vuln in enumerate(severity_vulns, 1):
+                        f.write(f"[{severity[0]}{i:02d}] {vuln.get('type', 'Unknown Vulnerability')}\n")
+                        f.write("─" * 60 + "\n")
+                        f.write(f"Severity     : {vuln.get('severity', 'Unknown')}\n")
+                        f.write(f"URL          : {vuln.get('url', 'N/A')}\n")
+                        f.write(f"Description  : {vuln.get('description', 'N/A')}\n")
+                        
+                        if vuln.get('payload'):
+                            f.write(f"Payload Used : {vuln['payload']}\n")
+                        
+                        # Add remediation advice based on vulnerability type
+                        vuln_type = vuln.get('type', '').lower()
+                        f.write("Remediation  : ")
+                        if 'sql injection' in vuln_type:
+                            f.write("Use parameterized queries and input validation\n")
+                        elif 'xss' in vuln_type:
+                            f.write("Implement proper output encoding and CSP headers\n")
+                        elif 'lfi' in vuln_type or 'file inclusion' in vuln_type:
+                            f.write("Validate file paths and implement access controls\n")
+                        elif 'command injection' in vuln_type:
+                            f.write("Avoid system calls with user input, use safe APIs\n")
+                        elif 'header' in vuln_type:
+                            f.write("Configure proper security headers in web server\n")
+                        else:
+                            f.write("Review security best practices for this vulnerability type\n")
+                        
+                        f.write("\n")
+                    
+                    f.write("\n")
+            
+            # Recommendations section
+            f.write("SECURITY RECOMMENDATIONS\n")
+            f.write("=" * 80 + "\n\n")
+            
+            if total_vulns > 0:
+                f.write("IMMEDIATE ACTIONS:\n")
+                f.write("• Review and address all Critical and High severity vulnerabilities\n")
+                f.write("• Implement proper input validation and output encoding\n")
+                f.write("• Configure security headers (CSP, X-Frame-Options, etc.)\n")
+                f.write("• Regular security testing and code reviews\n\n")
+                
+                f.write("LONG-TERM IMPROVEMENTS:\n")
+                f.write("• Implement a Web Application Firewall (WAF)\n")
+                f.write("• Regular penetration testing and vulnerability assessments\n")
+                f.write("• Security awareness training for development team\n")
+                f.write("• Automated security scanning in CI/CD pipeline\n\n")
+            else:
+                f.write("MAINTAIN SECURITY POSTURE:\n")
+                f.write("• Continue regular security assessments\n")
+                f.write("• Keep all software components updated\n")
+                f.write("• Monitor for new vulnerability types and attack vectors\n")
+                f.write("• Implement security logging and monitoring\n\n")
+            
+            # Footer
+            f.write("=" * 80 + "\n")
+            f.write("Report generated by ReconScan - Web Application Vulnerability Scanner\n")
+            f.write(f"For questions or support, contact: {scan_info.get('scanner_version', 'ReconScan Team')}\n")
+            f.write("=" * 80 + "\n")
+    
+    @staticmethod
+    def save_scan_results(scan_results, output_file):
+        """
+        Save scan results to formatted text file in reports directory.
+        
+        Args:
+            scan_results (dict): Scan results data
+            output_file (str): Output filename
+            
+        Returns:
+            Path: Path to saved report file
+        """
+        # Ensure we're saving to reports directory
+        if not output_file.startswith('reports/'):
+            output_file = f"reports/{output_file}"
+        
+        # Ensure .txt extension
+        if not output_file.endswith('.txt'):
+            output_file = output_file.replace('.json', '.txt') if '.json' in output_file else f"{output_file}.txt"
+        
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Generate professional text report
+        ReportCommand.generate_text_report(scan_results, output_path)
+        
+        return output_path
+    
     def _show_usage(self):
         """Display usage information."""
         print("Usage: report <action> [options]")
@@ -538,8 +726,8 @@ class ReportCommand:
         print("  " + ", ".join(self.export_formats))
         print("\nExamples:")
         print("  report list")
-        print("  report view scan_results.json --severity High")
-        print("  report summary latest_scan.json")
-        print("  report export results.json html report.html")
+        print("  report view scan_results.txt --severity High")
+        print("  report summary latest_scan.txt")
+        print("  report export results.txt html report.html")
         print("  report clean 7")
-        print("  report compare old_scan.json new_scan.json")
+        print("  report compare old_scan.txt new_scan.txt")

@@ -24,7 +24,7 @@ class ScanCommand:
     # Command metadata - self-documenting for help system
     description = "Perform web vulnerability scans on target URLs"
     usage = "scan <target_url> [options]"
-    example = "scan https://example.com --modules sqli,xss --output report.json"
+    example = "scan https://example.com --modules sqli,xss --output report.txt"
     category = "Scanning"
     
     def __init__(self):
@@ -308,7 +308,7 @@ class ScanCommand:
                         vulnerabilities_found += 1
                         
                         if verbose:
-                            print(f"    ✗ SQL injection found: {payload}")
+                            print(f"     SQL injection found: {payload}")
                         break
                         
             except Exception as e:
@@ -317,12 +317,12 @@ class ScanCommand:
                 continue
         
         if verbose and vulnerabilities_found == 0:
-            print("    ✓ No SQL injection vulnerabilities detected")
+            print("     No SQL injection vulnerabilities detected")
     
     async def _scan_xss(self, session, target, verbose=True):
         """Basic XSS detection."""
         if verbose:
-            print("  → Testing XSS payloads...")
+            print("   Testing XSS payloads...")
         
         # Basic XSS payloads
         payloads = [
@@ -356,7 +356,7 @@ class ScanCommand:
                         vulnerabilities_found += 1
                         
                         if verbose:
-                            print(f"    ✗ XSS vulnerability found: {payload}")
+                            print(f"     XSS vulnerability found: {payload}")
                         break
                         
             except Exception as e:
@@ -365,7 +365,7 @@ class ScanCommand:
                 continue
         
         if verbose and vulnerabilities_found == 0:
-            print("    ✓ No XSS vulnerabilities detected")
+            print("     No XSS vulnerabilities detected")
     
     async def _scan_lfi(self, session, target, verbose=True):
         """Basic Local File Inclusion detection."""
@@ -624,13 +624,13 @@ class ScanCommand:
             print("\n✓ No vulnerabilities detected")
     
     def _save_results(self, output_file):
-        """Save scan results to file."""
+        """Save scan results to formatted text file using ReportCommand."""
         try:
-            output_path = Path(output_file)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
+            # Import ReportCommand to use its report generation
+            from scanner.commands.report import ReportCommand
             
-            with open(output_path, 'w') as f:
-                json.dump(self.results, f, indent=2)
+            # Use ReportCommand to generate and save the report
+            output_path = ReportCommand.save_scan_results(self.results, output_file)
             
             print(f"\nResults saved to: {output_path}")
             
@@ -678,5 +678,5 @@ class ScanCommand:
         print("\nExamples:")
         print("  scan https://example.com")
         print("  scan https://example.com --modules sqli,xss,headers")
-        print("  scan https://example.com --output results.json --threads 10")
+        print("  scan https://example.com --output results.txt --threads 10")
         print("  scan https://example.com --modules lfi,cmdinjection --quiet")

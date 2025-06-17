@@ -170,8 +170,8 @@ class RunCommand:
         
         print("\nExamples:")
         print("  run quick https://example.com")
-        print("  run standard https://example.com scan_results.json")
-        print("  run deep https://testsite.local detailed_scan.json")
+        print("  run standard https://example.com scan_results.txt")
+        print("  run deep https://testsite.local detailed_scan.txt")
         print("  run headers https://example.com")
         print("  run injection https://vulnerable.site")
         
