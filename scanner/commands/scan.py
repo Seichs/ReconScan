@@ -55,6 +55,9 @@ class ScanCommand:
             'summary': {}
         }
         
+        # Track found vulnerabilities to avoid duplicates
+        self.found_vulnerabilities = set()
+        
     def execute(self, args=None):
         """
         Execute vulnerability scan with specified parameters.
@@ -187,6 +190,9 @@ class ScanCommand:
         """
         start_time = time.time()
         
+        # Clear previous scan data and initialize fresh tracking
+        self.found_vulnerabilities.clear()
+        
         # Initialize scan results
         self.results = {
             'scan_info': {
@@ -247,6 +253,17 @@ class ScanCommand:
             self._save_results(params['output'])
         
         return True
+    
+    def _add_vulnerability(self, vulnerability):
+        """Add vulnerability if not already found (deduplication)."""
+        # Create a unique key for this vulnerability
+        vuln_key = f"{vulnerability['type']}_{vulnerability['url']}_{vulnerability.get('payload', '')}"
+        
+        if vuln_key not in self.found_vulnerabilities:
+            self.found_vulnerabilities.add(vuln_key)
+            self.results['vulnerabilities'].append(vulnerability)
+            return True
+        return False
     
     async def _discover_urls(self, session, target, verbose=True):
         """
@@ -478,11 +495,10 @@ class ScanCommand:
                                     'payload': payload,
                                     'description': f'SQL injection vulnerability detected in parameter "{param_name}" through error-based testing'
                                 }
-                                self.results['vulnerabilities'].append(vulnerability)
-                                vulnerabilities_found += 1
-                                
-                                if verbose:
-                                    print(f"     SQL injection found: {param_name}={payload}")
+                                if self._add_vulnerability(vulnerability):
+                                    vulnerabilities_found += 1
+                                    if verbose:
+                                        print(f"     SQL injection found: {param_name}={payload}")
                                 break
                             
                             # Check for boolean-based blind SQL injection
@@ -505,11 +521,10 @@ class ScanCommand:
                                             'payload': payload,
                                             'description': f'Potential boolean-based SQL injection in parameter "{param_name}"'
                                         }
-                                        self.results['vulnerabilities'].append(vulnerability)
-                                        vulnerabilities_found += 1
-                                        
-                                        if verbose:
-                                            print(f"     Boolean SQL injection found: {param_name}={payload}")
+                                        if self._add_vulnerability(vulnerability):
+                                            vulnerabilities_found += 1
+                                            if verbose:
+                                                print(f"     Boolean SQL injection found: {param_name}={payload}")
                                         break
                             
                     except Exception as e:
@@ -577,20 +592,19 @@ class ScanCommand:
                             payload.upper()
                         ]
                         
-                        if any(var in content for var in payload_variations):
-                            vulnerability = {
-                                'type': 'Cross-Site Scripting (XSS)',
-                                'severity': 'Medium',
-                                'url': test_url,
-                                'payload': payload,
-                                'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
-                            }
-                            self.results['vulnerabilities'].append(vulnerability)
-                            vulnerabilities_found += 1
-                            
-                            if verbose:
-                                print(f"     XSS vulnerability found: {param}={payload}")
-                            break
+                                                 if any(var in content for var in payload_variations):
+                             vulnerability = {
+                                 'type': 'Cross-Site Scripting (XSS)',
+                                 'severity': 'Medium',
+                                 'url': test_url,
+                                 'payload': payload,
+                                 'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
+                             }
+                             if self._add_vulnerability(vulnerability):
+                                 vulnerabilities_found += 1
+                                 if verbose:
+                                     print(f"     XSS vulnerability found: {param}={payload}")
+                             break
                             
                 except Exception as e:
                     if verbose:
@@ -639,11 +653,10 @@ class ScanCommand:
                             'payload': payload,
                             'description': 'LFI vulnerability detected through file content disclosure'
                         }
-                        self.results['vulnerabilities'].append(vulnerability)
-                        vulnerabilities_found += 1
-                        
-                        if verbose:
-                            print(f"    ✗ LFI vulnerability found: {payload}")
+                        if self._add_vulnerability(vulnerability):
+                            vulnerabilities_found += 1
+                            if verbose:
+                                print(f"    ✗ LFI vulnerability found: {payload}")
                         break
                         
             except Exception as e:
@@ -693,11 +706,10 @@ class ScanCommand:
                             'payload': payload,
                             'description': 'Command injection vulnerability detected through command execution'
                         }
-                        self.results['vulnerabilities'].append(vulnerability)
-                        vulnerabilities_found += 1
-                        
-                        if verbose:
-                            print(f"     Command injection found: {payload}")
+                        if self._add_vulnerability(vulnerability):
+                            vulnerabilities_found += 1
+                            if verbose:
+                                print(f"     Command injection found: {payload}")
                         break
                         
             except Exception as e:
@@ -732,21 +744,23 @@ class ScanCommand:
                 
                 for header, description in security_headers.items():
                     if header not in headers:
-                        missing_headers.append(header)
-                        
-                        vulnerability = {
-                            'type': 'Missing Security Header',
-                            'severity': 'Low',
-                            'url': target,
-                            'payload': f"Missing: {header}",
-                            'description': f'Missing security header: {header} ({description})'
-                        }
-                        self.results['vulnerabilities'].append(vulnerability)
+                        missing_headers.append(f"{header} ({description})")
                 
-                if verbose:
-                    if missing_headers:
-                        print(f"     Missing security headers: {', '.join(missing_headers)}")
-                    else:
+                # Create single vulnerability for all missing headers
+                if missing_headers:
+                    vulnerability = {
+                        'type': 'Missing Security Headers',
+                        'severity': 'Low',
+                        'url': target,
+                        'payload': f"Missing {len(missing_headers)} headers",
+                        'description': f'Missing security headers: {", ".join(missing_headers)}'
+                    }
+                    self._add_vulnerability(vulnerability)
+                    
+                    if verbose:
+                        print(f"     Missing {len(missing_headers)} security headers")
+                else:
+                    if verbose:
                         print("     All important security headers present")
                         
         except Exception as e:
@@ -788,11 +802,10 @@ class ScanCommand:
                             'payload': payload,
                             'description': 'Directory traversal vulnerability detected'
                         }
-                        self.results['vulnerabilities'].append(vulnerability)
-                        vulnerabilities_found += 1
-                        
-                        if verbose:
-                            print(f"    ✗ Directory traversal found: {payload}")
+                        if self._add_vulnerability(vulnerability):
+                            vulnerabilities_found += 1
+                            if verbose:
+                                print(f"    ✗ Directory traversal found: {payload}")
                         break
                         
             except Exception as e:
