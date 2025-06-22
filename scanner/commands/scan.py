@@ -629,14 +629,19 @@ class ScanCommand:
         ]
         
         vulnerabilities_found = 0
+        consecutive_errors = 0
+        max_consecutive_errors = 5  # Stop scan after 5 consecutive errors
         
         for payload in payloads:
             try:
                 # Test with file parameter
                 test_url = f"{target}?file={urllib.parse.quote(payload)}"
                 
-                async with session.get(test_url) as response:
+                async with session.get(test_url, timeout=aiohttp.ClientTimeout(total=self.config.get('network', {}).get('timeout', 10))) as response:
                     content = await response.text()
+                    
+                    # Reset error counter on successful request
+                    consecutive_errors = 0
                     
                     # Look for file inclusion indicators
                     lfi_indicators = [
@@ -658,10 +663,33 @@ class ScanCommand:
                                 print(f"    ✗ LFI vulnerability found: {payload}")
                         break
                         
+            except asyncio.TimeoutError:
+                consecutive_errors += 1
+                if verbose and consecutive_errors <= max_consecutive_errors:
+                    print(f"    ! Timeout testing LFI payload (error {consecutive_errors})")
+                if consecutive_errors >= max_consecutive_errors:
+                    if verbose:
+                        print("    ! Too many consecutive timeouts, stopping LFI scan...")
+                    break
+            except aiohttp.ClientError as e:
+                consecutive_errors += 1
+                if verbose and consecutive_errors <= max_consecutive_errors:
+                    print(f"    ! Connection error during LFI test: {str(e)}")
+                if consecutive_errors >= max_consecutive_errors:
+                    if verbose:
+                        print("    ! Too many connection errors, stopping LFI scan...")
+                    break
             except Exception as e:
-                if verbose:
-                    print(f"    ! Error testing payload '{payload}': {str(e)}")
-                continue
+                consecutive_errors += 1
+                if verbose and consecutive_errors <= max_consecutive_errors:
+                    print(f"    ! Error testing payload '{payload[:30]}...': {str(e)}")
+                if consecutive_errors >= max_consecutive_errors:
+                    if verbose:
+                        print("    ! Too many consecutive errors, stopping LFI scan...")
+                    break
+                    
+            # Add small delay between requests
+            await asyncio.sleep(self.config.get('scanning', {}).get('delay', 0.5))
         
         if verbose and vulnerabilities_found == 0:
             print("    ✓ No LFI vulnerabilities detected")
