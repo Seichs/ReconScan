@@ -5,7 +5,7 @@
 # Application information
 app:
   name: "ReconScan"
-  version: "1.4.2-dev"
+  version: "1.5.0-dev"
   build: "alpha"
   author: "Seichs"
   description: "Web Application Vulnerability Scanner"
