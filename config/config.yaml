@@ -5,7 +5,7 @@
 # Application information
 app:
   name: "ReconScan"
-  version: "1.4.0-dev"
+  version: "1.4.2-dev"
   build: "alpha"
   author: "Seichs"
   description: "Web Application Vulnerability Scanner"
@@ -56,12 +56,14 @@ payload_defaults:
     error_based_enabled: true
     blind_enabled: true
     union_enabled: true
+    false_positive_filtering: true  # Enable intelligent false positive detection
   
   xss:
     default_encoding: "standard"     # standard, advanced, all
     dom_testing: true
     stored_testing: true
     reflected_testing: true
+    false_positive_filtering: true  # Enable intelligent false positive detection
   
   command_injection:
     default_os: "auto"              # auto, linux, windows, both
