@@ -435,12 +435,13 @@ class ScanCommand:
 
     
     def _generate_summary(self):
-        """Generate scan summary statistics."""
+        """Generate scan summary statistics with vulnerability grouping."""
         vulnerabilities = self.results['vulnerabilities']
         
         # Count by severity
         severity_count = {'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0}
         type_count = {}
+        grouped_vulnerabilities = {}
         
         for vuln in vulnerabilities:
             severity = vuln.get('severity', 'Unknown')
@@ -450,15 +451,40 @@ class ScanCommand:
                 severity_count[severity] += 1
             
             type_count[vuln_type] = type_count.get(vuln_type, 0) + 1
+            
+            # Group vulnerabilities by base type (remove subtypes in parentheses for grouping)
+            base_type = vuln_type.split('(')[0].strip()
+            if base_type not in grouped_vulnerabilities:
+                grouped_vulnerabilities[base_type] = {
+                    'count': 0,
+                    'subtypes': {},
+                    'examples': []
+                }
+            
+            grouped_vulnerabilities[base_type]['count'] += 1
+            
+            # Track subtypes
+            if vuln_type not in grouped_vulnerabilities[base_type]['subtypes']:
+                grouped_vulnerabilities[base_type]['subtypes'][vuln_type] = 0
+            grouped_vulnerabilities[base_type]['subtypes'][vuln_type] += 1
+            
+            # Store first few examples for display
+            if len(grouped_vulnerabilities[base_type]['examples']) < 3:
+                grouped_vulnerabilities[base_type]['examples'].append({
+                    'url': vuln.get('url', 'N/A'),
+                    'type': vuln_type,
+                    'severity': severity
+                })
         
         self.results['summary'] = {
             'total_vulnerabilities': len(vulnerabilities),
             'by_severity': severity_count,
-            'by_type': type_count
+            'by_type': type_count,
+            'grouped_vulnerabilities': grouped_vulnerabilities
         }
     
     def _display_results(self, verbose=True):
-        """Display scan results to console."""
+        """Display scan results to console with grouped vulnerability summary."""
         print("\n" + "=" * 60)
         print("SCAN RESULTS")
         print("=" * 60)
@@ -472,20 +498,46 @@ class ScanCommand:
             print("\nBy Severity:")
             for severity, count in summary['by_severity'].items():
                 if count > 0:
-                    print(f"  {severity}: {count}")
+                    severity_icon = "🔴" if severity == 'Critical' else "🟠" if severity == 'High' else "🟡" if severity == 'Medium' else "🟢"
+                    print(f"  {severity_icon} {severity}: {count}")
             
-            print("\nBy Type:")
-            for vuln_type, count in summary['by_type'].items():
-                print(f"  {vuln_type}: {count}")
+            # Display grouped vulnerabilities (cleaner CLI output)
+            print("\nVulnerabilities Found:")
+            grouped_vulns = summary.get('grouped_vulnerabilities', {})
             
-            if verbose:
-                print("\nDetailed Results:")
-                for i, vuln in enumerate(self.results['vulnerabilities'], 1):
-                    print(f"\n{i}. {vuln['type']} ({vuln['severity']})")
-                    print(f"   URL: {vuln['url']}")
-                    print(f"   Description: {vuln['description']}")
+            for base_type, group_info in grouped_vulns.items():
+                count = group_info['count']
+                subtypes = group_info['subtypes']
+                examples = group_info['examples']
+                
+                # Main vulnerability type with count
+                print(f"\n🔍 {base_type}: {count} vulnerabilities")
+                
+                # Show subtypes if there are multiple
+                if len(subtypes) > 1:
+                    for subtype, subcount in subtypes.items():
+                        subtype_detail = subtype.split('(')[1].rstrip(')') if '(' in subtype else subtype
+                        print(f"   • {subtype_detail}: {subcount}")
+                
+                # Show a few example URLs for context
+                if examples and verbose:
+                    print(f"   Examples:")
+                    for i, example in enumerate(examples[:2], 1):  # Show max 2 examples
+                        url_short = example['url'][:60] + "..." if len(example['url']) > 60 else example['url']
+                        print(f"     {i}. {url_short}")
+                    
+                    if count > 2:
+                        print(f"     ... and {count - 2} more (see detailed report)")
+            
+            # Option to show all details
+            if not verbose and summary['total_vulnerabilities'] > 5:
+                print(f"\n💡 Use --verbose flag or check the detailed report for all {summary['total_vulnerabilities']} vulnerabilities")
+            elif verbose and summary['total_vulnerabilities'] > 10:
+                print(f"\n📄 All {summary['total_vulnerabilities']} vulnerabilities with exploitation guidance saved to report file")
+                
         else:
-            print("\n✓ No vulnerabilities detected")
+            print("\n✅ No vulnerabilities detected")
+            print("   Target appears to be properly secured against tested attack vectors")
     
     def _save_results(self, output_file):
         """Save scan results to formatted text file using ReportCommand."""
