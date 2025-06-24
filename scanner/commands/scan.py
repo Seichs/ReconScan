@@ -519,8 +519,13 @@ class ScanCommand:
                         subtype_detail = subtype.split('(')[1].rstrip(')') if '(' in subtype else subtype
                         print(f"   • {subtype_detail}: {subcount}")
                 
-                # Show a few example URLs for context
-                if examples and verbose:
+                # Show examples only for high-impact vulnerabilities
+                show_examples = (
+                    verbose and examples and 
+                    base_type.lower() not in ['missing security headers', 'security headers']
+                )
+                
+                if show_examples:
                     print(f"   Examples:")
                     for i, example in enumerate(examples[:2], 1):  # Show max 2 examples
                         url_short = example['url'][:60] + "..." if len(example['url']) > 60 else example['url']
@@ -528,6 +533,8 @@ class ScanCommand:
                     
                     if count > 2:
                         print(f"     ... and {count - 2} more (see detailed report)")
+                elif base_type.lower() in ['missing security headers', 'security headers']:
+                    print(f"   → See report for detailed header analysis")
             
             # Option to show all details
             if not verbose and summary['total_vulnerabilities'] > 5:
