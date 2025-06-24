@@ -16,6 +16,19 @@ from datetime import datetime
 import json
 import re
 
+# ANSI color codes for terminal output
+class Colors:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    ENDC = '\033[0m'  # End color
+
 # Import modular scanning components
 from .scanning.false_positive_filters import FalsePositiveFilters
 from .scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
@@ -243,7 +256,7 @@ class ScanCommand:
             
             # Discover pages and parameters
             if params['verbose']:
-                print(f"\n[+] Discovering pages and parameters...")
+                print(f"\n[{Colors.PURPLE}+{Colors.ENDC}] Discovering pages and parameters...")
             
             discovered_urls = await self._discover_urls(session, params['target'], params['verbose'])
             
@@ -253,12 +266,12 @@ class ScanCommand:
             # Run each module
             for module in params['modules']:
                 if params['verbose']:
-                    print(f"\n[+] Running {self.available_modules[module]}...")
+                    print(f"\n[{Colors.PURPLE}+{Colors.ENDC}] Running {self.available_modules[module]}...")
                 
                 try:
                     await self._run_module(session, module, params)
                 except Exception as e:
-                    print(f"[-] Error in {module} module: {str(e)}")
+                    print(f"[{Colors.RED}-{Colors.ENDC}] Error in {module} module: {str(e)}")
                     continue
         
         # Calculate scan duration
