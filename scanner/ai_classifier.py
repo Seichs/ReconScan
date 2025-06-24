@@ -90,7 +90,7 @@ class AIVulnerabilityClassifier:
             with open(self.model_path, 'rb') as f:
                 self.ml_model = pickle.load(f)
                 self.logger.info("Pre-trained ML model loaded successfully")
-        except (FileNotFoundError, pickle.UnpicklingError):
+        except (FileNotFoundError, pickle.UnpicklingError, EOFError):
             self.logger.info("No pre-trained model found, using rule-based classification")
             self.ml_model = None
     
