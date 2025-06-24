@@ -51,8 +51,8 @@ class ScanCommand:
         self.false_positive_filters = FalsePositiveFilters()
         
         # Initialize vulnerability scanners
-        self.sql_scanner = SQLInjectionScanner(self.false_positive_filters, self.system_config)
-        self.xss_scanner = XSSScanner(self.false_positive_filters, self.system_config)
+        self.sql_scanner = SQLInjectionScanner()
+        self.xss_scanner = XSSScanner()  # Now uses AI classifier internally
         self.lfi_scanner = LFIScanner()
         self.cmd_scanner = CommandInjectionScanner()
         self.headers_scanner = SecurityHeadersScanner()

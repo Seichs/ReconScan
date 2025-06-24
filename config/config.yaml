@@ -5,10 +5,10 @@
 # Application information
 app:
   name: "ReconScan"
-  version: "1.6.0-dev"
+  version: "2.0.0-dev"
   build: "alpha"
   author: "Seichs"
-  description: "Web Application Vulnerability Scanner"
+  description: "AI-Enhanced Web Application Vulnerability Scanner"
 
 # System requirements and compatibility
 system:
