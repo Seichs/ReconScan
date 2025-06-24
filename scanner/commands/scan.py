@@ -22,7 +22,7 @@ class Colors:
     CYAN = '\033[96m'
     DARKCYAN = '\033[36m'
     BLUE = '\033[94m'
-    GREEN = '\033[32m'
+    GREEN = '\033[1;32m'  # Bold green for better visibility
     YELLOW = '\033[93m'
     RED = '\033[91m'
     BOLD = '\033[1m'
