@@ -350,7 +350,7 @@ class ScanCommand:
                     
                 try:
                     if verbose:
-                        print(f"  → Crawling: {url}")
+                        print(f"  {Colors.GREEN}→{Colors.ENDC} Crawling: {url}")
                     
                     async with session.get(url) as response:
                         if response.status == 200:
@@ -401,7 +401,7 @@ class ScanCommand:
                     discovered_urls.append(test_url)
             
             if verbose:
-                print(f"  → Discovered {len(discovered_urls)} URLs for testing")
+                print(f"  {Colors.GREEN}→{Colors.ENDC} Discovered {len(discovered_urls)} URLs for testing")
             
             return discovered_urls
             
@@ -547,7 +547,7 @@ class ScanCommand:
                     if count > 2:
                         print(f"     ... and {count - 2} more (see detailed report)")
                 elif base_type.lower() in ['missing security headers', 'security headers']:
-                    print(f"   → See report for detailed header analysis")
+                    print(f"   {Colors.GREEN}→{Colors.ENDC} See report for detailed header analysis")
             
             # Option to show all details
             if not verbose and summary['total_vulnerabilities'] > 5:
