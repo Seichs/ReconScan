@@ -461,4 +461,48 @@ class XSSPayloads:
         elif 'trident' in user_agent_lower or 'msie' in user_agent_lower:
             return self.browser_specific['ie']
         
-        return self.basic_payloads[:5] 
+        return self.basic_payloads[:5]
+    
+    def get_targeted_payloads(self, severity='medium'):
+        """
+        Get XSS payloads based on severity level for compatibility with scanner.
+        
+        Args:
+            severity (str): Severity level ('low', 'medium', 'high')
+            
+        Returns:
+            list: XSS payloads appropriate for the severity level
+        """
+        if severity.lower() == 'low':
+            # Basic payloads for low-severity testing
+            return self.basic_payloads[:8]
+        
+        elif severity.lower() == 'high':
+            # Comprehensive payloads for thorough testing
+            all_payloads = (
+                self.basic_payloads + 
+                self.context_payloads.get('html_content', []) +
+                self.context_payloads.get('script_tag', [])[:3] +
+                self.context_payloads.get('html_attribute', [])[:3]
+            )
+            return all_payloads[:25]
+        
+        else:  # medium (default)
+            # Balanced set for standard testing
+            medium_payloads = (
+                self.basic_payloads[:10] +
+                self.context_payloads.get('html_content', [])[:5] +
+                self.context_payloads.get('script_tag', [])[:2]
+            )
+            return medium_payloads[:15]
+    
+    def get_basic_payloads(self):
+        """Get basic XSS payloads for quick testing."""
+        return self.basic_payloads
+    
+    def get_advanced_payloads(self):
+        """Get advanced XSS payloads for comprehensive testing."""
+        advanced = []
+        for context_type, payloads in self.context_payloads.items():
+            advanced.extend(payloads[:3])  # Top 3 from each context
+        return advanced[:20] 

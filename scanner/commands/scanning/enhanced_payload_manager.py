@@ -135,7 +135,7 @@ class EnhancedPayloadManager:
         self.ml_model = None
         
     def generate_adaptive_payloads(self, vuln_type: VulnerabilityType, context: PayloadContext, 
-                                 max_payloads: int = 15) -> List[str]:
+                                 max_payloads: int = 50) -> List[str]:
         """
         Generate adaptive payloads based on context analysis and historical success rates.
         
@@ -170,8 +170,13 @@ class EnhancedPayloadManager:
         # Step 6: Score and rank payloads based on success probability
         scored_payloads = self._score_payloads(mutated_payloads, vuln_type, context)
         
-        # Step 7: Return top-ranked payloads
-        return [payload for payload, score in scored_payloads[:max_payloads]]
+        # Step 7: Return top-ranked payloads (but don't artificially limit good payloads)
+        # Only limit if we have way too many payloads (>100) to avoid performance issues
+        if len(scored_payloads) > 100:
+            return [payload for payload, score in scored_payloads[:max_payloads]]
+        else:
+            # Return all scored payloads if reasonable number
+            return [payload for payload, score in scored_payloads]
     
     def _detect_waf(self, response_content: str) -> WAFType:
         """Detect Web Application Firewall from response content."""
@@ -207,11 +212,18 @@ class EnhancedPayloadManager:
                                        context: PayloadContext) -> List[str]:
         """Generate payloads based on vulnerability type and context."""
         if vuln_type == VulnerabilityType.SQL_INJECTION:
-            return self.sql_payloads.generate_context_aware_payloads(
+            # Get comprehensive context-aware payloads
+            context_payloads = self.sql_payloads.generate_context_aware_payloads(
                 context.parameter_type, 
                 context.parameter_name, 
                 context.detected_technology
             )
+            
+            # Add high-value traditional payloads for comprehensive coverage
+            traditional_payloads = self.sql_payloads.get_targeted_payloads('high')
+            
+            # Combine for maximum effectiveness
+            return context_payloads + traditional_payloads
         
         elif vuln_type == VulnerabilityType.XSS:
             return self.xss_payloads.generate_context_aware_payloads(
