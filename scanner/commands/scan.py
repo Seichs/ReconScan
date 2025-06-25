@@ -29,6 +29,18 @@ class Colors:
     UNDERLINE = '\033[4m'
     ENDC = '\033[0m'  # End color
 
+# Configuration constants for scan limits and thresholds
+class ScanLimits:
+    MAX_THREAD_WARNING_THRESHOLD = 100
+    MAX_TIMEOUT_WARNING_THRESHOLD = 300  # 5 minutes in seconds
+    MAX_CRAWL_URLS = 10
+    MAX_DISCOVERED_URLS = 20
+    MAX_QUEUE_SIZE = 20
+    MAX_URLS_FOR_TESTING = 20
+    CRAWL_TIMEOUT_SECONDS = 5
+    MAX_DETAILS_DISPLAY = 5
+    MAX_VERBOSE_DISPLAY = 10
+
 # Import modular scanning components
 from .scanning.false_positive_filters import FalsePositiveFilters
 from .scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
@@ -176,7 +188,7 @@ class ScanCommand:
                     threads = int(parts[i + 1])
                     if threads <= 0:
                         print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Thread count must be positive, using default ({scan_params['threads']})")
-                    elif threads > 100:
+                    elif threads > ScanLimits.MAX_THREAD_WARNING_THRESHOLD:
                         print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: High thread count ({threads}) may cause rate limiting, consider lower values")
                         scan_params['threads'] = threads
                     else:
@@ -189,7 +201,7 @@ class ScanCommand:
                     timeout = int(parts[i + 1])
                     if timeout <= 0:
                         print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Timeout must be positive, using default ({scan_params['timeout']}s)")
-                    elif timeout > 300:  # 5 minutes
+                    elif timeout > ScanLimits.MAX_TIMEOUT_WARNING_THRESHOLD:
                         print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Very high timeout ({timeout}s) may cause long waits")
                         scan_params['timeout'] = timeout
                     else:
@@ -318,112 +330,110 @@ class ScanCommand:
     
     async def _discover_urls(self, session, target, verbose=True):
         """
-        Discover URLs and parameters by crawling the target site.
+        Discover URLs with parameters for vulnerability testing.
+        
+        Crawls the target website to find pages with parameters that can be tested
+        for vulnerabilities. Uses common page discovery and form parameter extraction.
         
         Args:
-            session: aiohttp session
-            target (str): Target URL
-            verbose (bool): Verbose output
+            session: aiohttp session for HTTP requests
+            target (str): Target URL to crawl
+            verbose (bool): Enable verbose output
             
         Returns:
-            list: List of discovered URLs with parameters
+            list: List of URLs with parameters for testing
         """
-        discovered_urls = []
-        visited_urls = set()
+        discovered_parameter_urls = []
+        crawled_pages = set()
         
         try:
-            # Parse base URL
-            base_parsed = urlparse(target)
-            base_domain = f"{base_parsed.scheme}://{base_parsed.netloc}"
+            # Parse base URL for domain validation
+            from urllib.parse import urlparse, urljoin, parse_qs
+            target_parsed = urlparse(target)
+            base_domain = f"{target_parsed.scheme}://{target_parsed.netloc}"
             
-            # URLs to crawl
-            urls_to_crawl = [target]
+            # URLs to crawl for parameter discovery
+            crawl_queue = [target]
             
-            # Common pages to check
-            common_pages = [
-                '', 'index.php', 'index.html', 'index.asp', 'index.aspx',
-                'login.php', 'admin.php', 'search.php', 'categories.php',
-                'artists.php', 'guestbook.php', 'cart.php', 'profile.php',
-                'signup.php', 'contact.php', 'about.php'
+            # Common pages to check for parameters
+            common_test_pages = [
+                'index.php', 'search.php', 'login.php', 'admin.php',
+                'search', 'login', 'admin', 'user', 'profile',
+                'view.php', 'show.php', 'display.php', 'page.php'
             ]
             
             # Add common pages to crawl list
-            for page in common_pages:
-                full_url = urljoin(base_domain + '/', page)
-                if full_url not in urls_to_crawl:
-                    urls_to_crawl.append(full_url)
+            for page in common_test_pages:
+                test_page_url = urljoin(target, page)
+                if test_page_url not in crawl_queue:
+                    crawl_queue.append(test_page_url)
             
-            crawl_count = 0
-            max_crawl = 10  # Limit crawling to avoid infinite loops
-            
-            for url in urls_to_crawl:
-                if crawl_count >= max_crawl:
-                    break
-                    
-                if url in visited_urls:
+            # Crawl each URL to discover parameters
+            for current_url in crawl_queue[:ScanLimits.MAX_CRAWL_URLS]:
+                if current_url in crawled_pages:
                     continue
                     
+                crawled_pages.add(current_url)
+                
                 try:
-                    if verbose:
-                        print(f"  {Colors.GREEN}→{Colors.ENDC} Crawling: {url}")
-                    
-                    async with session.get(url) as response:
+                    async with session.get(current_url, timeout=aiohttp.ClientTimeout(total=5)) as response:
                         if response.status == 200:
-                            content = await response.text()
-                            visited_urls.add(url)
-                            crawl_count += 1
+                            page_content = await response.text()
                             
                             # Extract links and forms
-                            links = re.findall(r'href=["\']([^"\']+)["\']', content, re.IGNORECASE)
-                            forms = re.findall(r'<form[^>]*action=["\']([^"\']*)["\'][^>]*>', content, re.IGNORECASE)
+                            import re
                             
-                            # Process links
-                            for link in links:
-                                full_link = urljoin(url, link)
-                                parsed_link = urlparse(full_link)
-                                
+                            # Process links with parameters
+                            link_pattern = r'href=["\']([^"\']+)["\']'
+                            discovered_links = re.findall(link_pattern, page_content, re.IGNORECASE)
+                            
+                            for link_url in discovered_links:
                                 # Only process links from same domain
-                                if parsed_link.netloc == base_parsed.netloc:
+                                absolute_link = urljoin(current_url, link_url)
+                                if urlparse(absolute_link).netloc == target_parsed.netloc:
                                     # Check if link has parameters
-                                    if parsed_link.query:
-                                        discovered_urls.append(full_link)
-                                        if verbose:
-                                            print(f"    Found URL with params: {full_link}")
-                                    
-                                    # Add to crawl list if it's a new page
-                                    if full_link not in visited_urls and len(urls_to_crawl) < 20:
-                                        urls_to_crawl.append(full_link)
+                                    if '?' in absolute_link and '=' in absolute_link:
+                                        if absolute_link not in discovered_parameter_urls:
+                                            discovered_parameter_urls.append(absolute_link)
+                                    else:
+                                        # Add to crawl list if it's a new page
+                                        if absolute_link not in crawl_queue and len(crawl_queue) < 20:
+                                            crawl_queue.append(absolute_link)
                             
-                            # Process forms
-                            for form_action in forms:
-                                if form_action:
-                                    full_form_url = urljoin(url, form_action)
-                                    if urlparse(full_form_url).netloc == base_parsed.netloc:
-                                        discovered_urls.append(full_form_url)
-                                        if verbose:
-                                            print(f"    Found form action: {full_form_url}")
-                
-                except Exception as e:
-                    if verbose:
-                        print(f"    ! Error crawling {url}: {str(e)}")
-                    continue
+                            # Process forms for parameter discovery
+                            form_pattern = r'<form[^>]*action=["\']([^"\']*)["\'][^>]*>(.*?)</form>'
+                            input_pattern = r'<input[^>]*name=["\']([^"\']+)["\']'
+                            
+                            discovered_forms = re.findall(form_pattern, page_content, re.IGNORECASE | re.DOTALL)
+                            for form_action, form_content in discovered_forms:
+                                form_url = urljoin(current_url, form_action) if form_action else current_url
+                                input_names = re.findall(input_pattern, form_content, re.IGNORECASE)
+                                
+                                # Create test URLs with discovered parameters
+                                for param_name in input_names:
+                                    test_url_with_param = f"{form_url}?{param_name}=test"
+                                    if test_url_with_param not in discovered_parameter_urls:
+                                        discovered_parameter_urls.append(test_url_with_param)
+                        
+                except Exception:
+                    continue  # Skip failed requests during discovery
             
             # If no URLs with parameters found, create test URLs with common parameters
-            if not discovered_urls:
-                test_params = ['id', 'cat', 'page', 'search', 'artist', 'user']
-                for param in test_params:
-                    test_url = f"{target}?{param}=1"
-                    discovered_urls.append(test_url)
+            if not discovered_parameter_urls:
+                common_test_parameters = ['id', 'cat', 'page', 'search', 'artist', 'user']
+                for parameter_name in common_test_parameters:
+                    fallback_test_url = f"{target}?{parameter_name}=1"
+                    discovered_parameter_urls.append(fallback_test_url)
             
             if verbose:
-                print(f"  {Colors.GREEN}→{Colors.ENDC} Discovered {len(discovered_urls)} URLs for testing")
+                print(f"  {Colors.GREEN}→{Colors.ENDC} Discovered {len(discovered_parameter_urls)} URLs for testing")
             
-            return discovered_urls
+            return discovered_parameter_urls[:ScanLimits.MAX_URLS_FOR_TESTING]
             
-        except Exception as e:
-            if verbose:
-                print(f"  ! Error during URL discovery: {str(e)}")
+        except Exception:
             # Fallback to basic parameter testing
+            if verbose:
+                print(f"  {Colors.YELLOW}!{Colors.ENDC} URL discovery failed, using basic parameter testing")
             return [f"{target}?id=1", f"{target}?cat=1", f"{target}?search=test"]
     
     async def _run_module(self, session, module, params):
@@ -600,9 +610,9 @@ class ScanCommand:
                     print(f"   {Colors.GREEN}→{Colors.ENDC} See report for detailed header analysis")
             
             # Option to show all details
-            if not verbose and summary['total_vulnerabilities'] > 5:
+            if not verbose and summary['total_vulnerabilities'] > ScanLimits.MAX_DETAILS_DISPLAY:
                 print(f"\n💡 Use --verbose flag or check the detailed report for all {summary['total_vulnerabilities']} vulnerabilities")
-            elif verbose and summary['total_vulnerabilities'] > 10:
+            elif verbose and summary['total_vulnerabilities'] > ScanLimits.MAX_VERBOSE_DISPLAY:
                 print(f"\n📄 All {summary['total_vulnerabilities']} vulnerabilities with exploitation guidance saved to report file")
                 
         else:

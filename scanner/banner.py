@@ -22,22 +22,11 @@ def get_banner():
 \033[90m     Web Application Vulnerability Scanner\033[0m
 """
 
-def get_version_info():
-    """
-    Returns version and build information.
-    
-    Returns:
-        str: Version info string
-    """
-    return "\033[90mv1.4.0-dev | Built with Python\033[0m"
-
 def display_banner():
     """
     Prints the complete banner to console.
+    
+    This function is provided for convenience when you want to display
+    the banner without additional formatting or version information.
     """
-    print(get_banner())
-    print(get_version_info())
-
-if __name__ == "__main__":
-    # For testing the banner directly
-    display_banner() 
+    print(get_banner()) 

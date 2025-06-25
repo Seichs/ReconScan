@@ -73,33 +73,43 @@ class ConfigCommand:
                 print("No configuration file found. Use 'set' command to create settings.")
                 return False
                 
-            with open(self.config_file, 'r') as f:
-                config = json.load(f)
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                config_data = json.load(f)
             
             print("\nRECONSCAN CONFIGURATION")
             print("=" * 50)
             
-            for category, settings in config.items():
-                print(f"\n{category.upper()} SETTINGS:")
+            for category_name, category_settings in config_data.items():
+                print(f"\n{category_name.upper()} SETTINGS:")
                 print("-" * 30)
                 
-                for setting, value in settings.items():
-                    if value is None:
+                for setting_name, setting_value in category_settings.items():
+                    if setting_value is None:
                         display_value = "Not set"
-                    elif isinstance(value, str) and value == "":
+                    elif isinstance(setting_value, str) and setting_value == "":
                         display_value = "Empty"
                     else:
-                        display_value = str(value)
+                        display_value = str(setting_value)
                     
-                    print(f"  {setting:<20} : {display_value}")
+                    print(f"  {setting_name:<20} : {display_value}")
             
             print("\n" + "=" * 50)
             print("Use 'set <category.setting> <value>' to change settings")
             print("Use 'config reset' to restore defaults")
             return True
             
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Error reading configuration: {e}")
+        except json.JSONDecodeError as json_error:
+            print(f"Error: Configuration file contains invalid JSON: {json_error}")
+            print("Use 'config reset' to restore defaults or fix the JSON manually.")
+            return False
+        except PermissionError:
+            print("Error: Permission denied reading configuration file.")
+            return False
+        except FileNotFoundError:
+            print("Error: Configuration file not found (this shouldn't happen).")
+            return False
+        except Exception as unexpected_error:
+            print(f"Unexpected error reading configuration: {unexpected_error}")
             return False
     
     def _reset_config(self):

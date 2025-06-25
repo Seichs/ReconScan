@@ -476,55 +476,62 @@ class ReportCommand:
             return False
     
     def _compare_reports(self, file1, file2):
-        """Compare two report files."""
+        """Compare two vulnerability scan reports and show differences."""
         try:
             # Load both reports
-            reports = []
-            for filename in [file1, file2]:
-                report_path = Path(filename)
-                if not report_path.exists():
-                    report_path = self.reports_dir / filename
-                    if not report_path.exists():
-                        print(f"Error: Report file '{filename}' not found")
-                        return False
-                
-                with open(report_path, 'r') as f:
-                    reports.append(json.load(f))
+            report_path_1 = Path(file1)
+            if not report_path_1.exists():
+                report_path_1 = self.reports_dir / file1
+                if not report_path_1.exists():
+                    print(f"Error: Report file '{file1}' not found")
+                    return False
             
-            report1, report2 = reports
+            report_path_2 = Path(file2)
+            if not report_path_2.exists():
+                report_path_2 = self.reports_dir / file2
+                if not report_path_2.exists():
+                    print(f"Error: Report file '{file2}' not found")
+                    return False
             
-            print("REPORT COMPARISON")
-            print("=" * 60)
+            with open(report_path_1, 'r') as f:
+                first_report = json.load(f)
+            with open(report_path_2, 'r') as f:
+                second_report = json.load(f)
             
             # Compare basic info
-            info1 = report1.get('scan_info', {})
-            info2 = report2.get('scan_info', {})
+            first_info = first_report.get('scan_info', {})
+            second_info = second_report.get('scan_info', {})
             
-            print(f"Report 1: {info1.get('target', 'Unknown')} ({info1.get('start_time', 'Unknown')})")
-            print(f"Report 2: {info2.get('target', 'Unknown')} ({info2.get('start_time', 'Unknown')})")
+            print(f"\nCOMPARING REPORTS")
+            print("=" * 40)
+            print(f"Report 1: {file1} - {first_info.get('start_time', 'Unknown date')}")
+            print(f"Report 2: {file2} - {second_info.get('start_time', 'Unknown date')}")
             
             # Compare vulnerability counts
-            summary1 = report1.get('summary', {})
-            summary2 = report2.get('summary', {})
+            first_summary = first_report.get('summary', {})
+            second_summary = second_report.get('summary', {})
             
-            total1 = summary1.get('total_vulnerabilities', 0)
-            total2 = summary2.get('total_vulnerabilities', 0)
+            first_total = first_summary.get('total_vulnerabilities', 0)
+            second_total = second_summary.get('total_vulnerabilities', 0)
+            total_difference = second_total - first_total
             
-            print(f"\nVulnerability Count:")
-            print(f"Report 1: {total1}")
-            print(f"Report 2: {total2}")
-            print(f"Difference: {total2 - total1:+d}")
+            print(f"\nVULNERABILITY COUNT COMPARISON:")
+            print("-" * 30)
+            print(f"Report 1: {first_total} vulnerabilities")
+            print(f"Report 2: {second_total} vulnerabilities")
+            print(f"Change: {total_difference:+d} vulnerabilities")
             
             # Compare by severity
-            sev1 = summary1.get('by_severity', {})
-            sev2 = summary2.get('by_severity', {})
+            first_severity_breakdown = first_summary.get('by_severity', {})
+            second_severity_breakdown = second_summary.get('by_severity', {})
             
-            print(f"\nBy Severity:")
+            print(f"\nSEVERITY BREAKDOWN:")
+            print("-" * 20)
             for severity in self.severity_levels:
-                count1 = sev1.get(severity, 0)
-                count2 = sev2.get(severity, 0)
-                diff = count2 - count1
-                print(f"  {severity}: {count1} → {count2} ({diff:+d})")
+                first_count = first_severity_breakdown.get(severity, 0)
+                second_count = second_severity_breakdown.get(severity, 0)
+                severity_difference = second_count - first_count
+                print(f"  {severity}: {first_count} → {second_count} ({severity_difference:+d})")
             
             return True
             
