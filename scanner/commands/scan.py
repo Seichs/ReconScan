@@ -60,16 +60,13 @@ class ScanCommand:
         self.system_config = get_system_config()
         self.config = self._load_scan_config()
         
-        # Initialize false positive filters
+        # Initialize false positive filters once
+        from scanner.commands.scanning.false_positive_filters import FalsePositiveFilters
         self.false_positive_filters = FalsePositiveFilters()
         
-        # Initialize vulnerability scanners
-        self.sql_scanner = SQLInjectionScanner()
-        self.xss_scanner = XSSScanner()  # Now uses AI classifier internally
-        self.lfi_scanner = LFIScanner()
-        self.cmd_scanner = CommandInjectionScanner()
-        self.headers_scanner = SecurityHeadersScanner()
-        self.dir_scanner = DirectoryTraversalScanner()
+        # TODO: Implement lazy loading for better performance - scanners only loaded when needed
+        # Cache for lazy-loaded scanners
+        self._scanner_cache = {}
         
         # Available scan modules
         self.available_modules = {
@@ -257,9 +254,13 @@ class ScanCommand:
         
         # Create HTTP session with configuration
         timeout = aiohttp.ClientTimeout(total=params['timeout'])
+        # TODO: Optimize connection pooling for better performance
         connector = aiohttp.TCPConnector(
             limit=params['threads'],
-            ssl=not self.config.get('network', {}).get('verify_ssl', False)
+            limit_per_host=min(params['threads'], 10),  # Limit per host to avoid overwhelming target
+            ssl=not self.config.get('network', {}).get('verify_ssl', False),
+            keepalive_timeout=30,  # Keep connections alive for reuse
+            enable_cleanup_closed=True  # Clean up closed connections
         )
         
         async with aiohttp.ClientSession(
@@ -438,28 +439,63 @@ class ScanCommand:
         verbose = params['verbose']
         vulnerabilities = []
         
-        if module == 'sqli':
-            vulnerabilities = await self.sql_scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose)
-        elif module == 'xss':
-            vulnerabilities = await self.xss_scanner.scan(session, target, verbose)
-        elif module == 'lfi':
-            vulnerabilities = await self.lfi_scanner.scan(session, target, self.config, verbose)
-        elif module == 'cmdinjection':
-            vulnerabilities = await self.cmd_scanner.scan(session, target, verbose)
-        elif module == 'headers':
-            vulnerabilities = await self.headers_scanner.scan(session, target, verbose)
-        elif module == 'dirtraversal':
-            vulnerabilities = await self.dir_scanner.scan(session, target, verbose)
+        scanner = self._get_scanner(module)
+        if scanner:
+            # Handle different scanner method signatures for optimal performance
+            if module == 'sqli':
+                vulnerabilities = await scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose)
+            elif module == 'lfi':
+                vulnerabilities = await scanner.scan(session, target, self.config, verbose)
+            else:
+                vulnerabilities = await scanner.scan(session, target, verbose)
         
         # Add discovered vulnerabilities to results
         for vulnerability in vulnerabilities:
             self._add_vulnerability(vulnerability)
     
-
-
-
-
-
+    def _get_scanner(self, module_name):
+        """
+        Lazy load vulnerability scanners for better performance.
+        
+        Args:
+            module_name (str): Name of the scanner module
+            
+        Returns:
+            Scanner instance or None if module not found
+        """
+        if module_name in self._scanner_cache:
+            return self._scanner_cache[module_name]
+        
+        # Lazy import and initialize scanners
+        try:
+            if module_name == 'sqli':
+                from scanner.commands.scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
+                scanner = SQLInjectionScanner()
+            elif module_name == 'xss':
+                from scanner.commands.scanning.vulnerability_scanners.xss_scanner import XSSScanner
+                scanner = XSSScanner()
+            elif module_name == 'lfi':
+                from scanner.commands.scanning.vulnerability_scanners.lfi_scanner import LFIScanner
+                scanner = LFIScanner()
+            elif module_name == 'cmdinjection':
+                from scanner.commands.scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
+                scanner = CommandInjectionScanner()
+            elif module_name == 'headers':
+                from scanner.commands.scanning.vulnerability_scanners.security_headers_scanner import SecurityHeadersScanner
+                scanner = SecurityHeadersScanner()
+            elif module_name == 'dirtraversal':
+                from scanner.commands.scanning.vulnerability_scanners.directory_traversal_scanner import DirectoryTraversalScanner
+                scanner = DirectoryTraversalScanner()
+            else:
+                return None
+            
+            # Cache the scanner for reuse
+            self._scanner_cache[module_name] = scanner
+            return scanner
+            
+        except ImportError as e:
+            print(f"[{Colors.RED}-{Colors.ENDC}] Error loading {module_name} scanner: {str(e)}")
+            return None
     
     def _generate_summary(self):
         """Generate scan summary statistics with vulnerability grouping."""
@@ -588,15 +624,19 @@ class ScanCommand:
             print(f"Error saving results: {str(e)}")
     
     def _load_scan_config(self):
-        """Load scan configuration from file."""
+        """Load scan configuration from file with caching for better performance."""
+        # TODO: Cache configuration to avoid repeated file I/O operations
+        if hasattr(self, '_cached_config'):
+            return self._cached_config
+            
         try:
             config_file = Path("config/scanner_config.json")
             if config_file.exists():
-                with open(config_file, 'r') as f:
-                    return json.load(f)
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    self._cached_config = json.load(f)
             else:
                 # Return default configuration
-                return {
+                self._cached_config = {
                     "network": {
                         "timeout": 10,
                         "user_agent": "ReconScan/1.0",
@@ -611,8 +651,12 @@ class ScanCommand:
                         "report_format": "json"
                     }
                 }
-        except Exception:
-            return {}
+            return self._cached_config
+        except (json.JSONDecodeError, IOError) as e:
+            # FIXME: Implement proper logging for configuration errors
+            print(f"Warning: Error loading scan config ({e}), using defaults")
+            self._cached_config = {}
+            return self._cached_config
     
     def _show_usage(self):
         """Display usage information."""

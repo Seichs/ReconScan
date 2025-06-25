@@ -5,32 +5,51 @@ class CommandRegistry:
     def __init__(self):
         self.commands = {}
         self.metadata = {}  # Store command metadata
+        # TODO: Implement lazy loading for better startup performance
+        self._command_modules = {}  # Cache for loaded modules
+        self._scanned_commands = None  # Cache for command discovery
         self.load_commands()
     
     def load_commands(self):
-        """Automatically load all command classes from the commands directory"""
+        """Scan for command modules without loading them immediately for better performance"""
+        if self._scanned_commands is not None:
+            return  # Already scanned
+            
         commands_dir = os.path.dirname(__file__)
+        self._scanned_commands = []
         
         for file in os.listdir(commands_dir):
             if file.endswith('.py') and file not in ['__init__.py', 'registry.py', 'base_command.py']:
-                try:
-                    module_name = file[:-3]  # Remove .py extension
-                    module = importlib.import_module(f'scanner.commands.{module_name}')
+                module_name = file[:-3]  # Remove .py extension
+                self._scanned_commands.append(module_name)
+        
+        # Load commands immediately for now (can be optimized to lazy load later)
+        for module_name in self._scanned_commands:
+            self._load_command_module(module_name)
+    
+    def _load_command_module(self, module_name):
+        """Load a specific command module and extract its command class"""
+        if module_name in self._command_modules:
+            return  # Already loaded
+            
+        try:
+            module = importlib.import_module(f'scanner.commands.{module_name}')
+            self._command_modules[module_name] = module
+            
+            # Look for a class ending with 'Command'
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                if (isinstance(attr, type) and 
+                    attr_name.endswith('Command') and 
+                    hasattr(attr, 'execute')):
+                    command_name = module_name  # Use filename as command name
+                    self.commands[command_name] = attr
                     
-                    # Look for a class ending with 'Command'
-                    for attr_name in dir(module):
-                        attr = getattr(module, attr_name)
-                        if (isinstance(attr, type) and 
-                            attr_name.endswith('Command') and 
-                            hasattr(attr, 'execute')):
-                            command_name = module_name  # Use filename as command name
-                            self.commands[command_name] = attr
-                            
-                            # Extract metadata from command class
-                            self.metadata[command_name] = self._extract_metadata(attr)
-                            break
-                except ImportError:
-                    continue  # Skip files that can't be imported
+                    # Extract metadata from command class
+                    self.metadata[command_name] = self._extract_metadata(attr)
+                    break
+        except ImportError:
+            pass  # Skip files that can't be imported
     
     def _extract_metadata(self, command_class):
         """

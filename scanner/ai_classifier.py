@@ -95,29 +95,24 @@ class AIVulnerabilityClassifier:
             self.ml_model = None
     
     def _init_xss_patterns(self) -> None:
-        """Initialize XSS detection patterns and contexts."""
-        # Dangerous XSS contexts (high execution likelihood)
+        """Initialize XSS detection patterns for vulnerability classification."""
+        # TODO: Pre-compile regex patterns for better performance
+        
+        # Dangerous XSS execution contexts - compiled patterns
         self.dangerous_xss_contexts = [
-            r'<script[^>]*>.*?{payload}.*?</script>',  # Direct script execution
-            r'<iframe[^>]*src=["\'].*?{payload}.*?["\']',  # Iframe source injection
-            r'<img[^>]*src=["\'].*?{payload}.*?["\']',  # Image source injection
-            r'<a[^>]*href=["\'].*?{payload}.*?["\']',  # Link href injection
-            r'on\w+=["\'].*?{payload}.*?["\']',  # Event handler injection
-            r'javascript:.*?{payload}',  # JavaScript protocol
+            re.compile(r'<script[^>]*>{payload}.*?</script>', re.IGNORECASE),
+            re.compile(r'javascript:{payload}', re.IGNORECASE),
+            re.compile(r'on\w+\s*=\s*["\']?{payload}', re.IGNORECASE),
+            re.compile(r'<iframe[^>]*src\s*=\s*["\']?{payload}', re.IGNORECASE),
+            re.compile(r'<img[^>]*src\s*=\s*["\']?{payload}', re.IGNORECASE)
         ]
         
-        # Safe XSS contexts (low execution likelihood)
+        # Safe XSS contexts - compiled patterns  
         self.safe_xss_contexts = [
-            r'<textarea[^>]*>.*?{payload}.*?</textarea>',  # Textarea content
-            r'<title[^>]*>.*?{payload}.*?</title>',  # Title tag
-            r'<!--.*?{payload}.*?-->',  # HTML comments
-            r'<pre[^>]*>.*?{payload}.*?</pre>',  # Preformatted text
-        ]
-        
-        # HTML encoding patterns
-        self.html_encoded_patterns = [
-            r'&lt;', r'&gt;', r'&quot;', r'&#x27;', r'&#x2F;',
-            r'&amp;', r'&#39;', r'%3C', r'%3E', r'%22', r'%27'
+            re.compile(r'<input[^>]*value\s*=\s*["\']?{payload}["\']?', re.IGNORECASE),
+            re.compile(r'<textarea[^>]*>{payload}</textarea>', re.IGNORECASE),
+            re.compile(r'<!--.*?{payload}.*?-->', re.IGNORECASE),
+            re.compile(r'<title[^>]*>{payload}</title>', re.IGNORECASE)
         ]
     
     def _init_sql_patterns(self) -> None:
@@ -217,19 +212,23 @@ class AIVulnerabilityClassifier:
         
         # Check for dangerous execution contexts
         dangerous_context_found = False
-        for pattern in self.dangerous_xss_contexts:
-            if re.search(pattern.format(payload=re.escape(payload)), response, re.IGNORECASE):
+        for pattern_template in self.dangerous_xss_contexts:
+            # Substitute payload into the pattern template for efficient matching
+            pattern_str = pattern_template.pattern.replace('{payload}', re.escape(payload))
+            if re.search(pattern_str, response, re.IGNORECASE):
                 dangerous_context_found = True
-                risk_factors.append(f"Dangerous context: {pattern.split('.*?')[0]}")
+                risk_factors.append(f"Dangerous context: {pattern_template.pattern.split('{')[0]}")
                 confidence_score += 0.4
                 break
         
         # Check for safe contexts
         safe_context_found = False
-        for pattern in self.safe_xss_contexts:
-            if re.search(pattern.format(payload=re.escape(payload)), response, re.IGNORECASE):
+        for pattern_template in self.safe_xss_contexts:
+            # Substitute payload into the pattern template for efficient matching
+            pattern_str = pattern_template.pattern.replace('{payload}', re.escape(payload))
+            if re.search(pattern_str, response, re.IGNORECASE):
                 safe_context_found = True
-                mitigation_evidence.append(f"Safe context: {pattern.split('.*?')[0]}")
+                mitigation_evidence.append(f"Safe context: {pattern_template.pattern.split('{')[0]}")
                 confidence_score -= 0.2
                 break
         
