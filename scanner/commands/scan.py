@@ -176,15 +176,29 @@ class ScanCommand:
                 i += 2
             elif arg == '--threads' and i + 1 < len(parts):
                 try:
-                    scan_params['threads'] = int(parts[i + 1])
+                    threads = int(parts[i + 1])
+                    if threads <= 0:
+                        print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Thread count must be positive, using default ({scan_params['threads']})")
+                    elif threads > 100:
+                        print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: High thread count ({threads}) may cause rate limiting, consider lower values")
+                        scan_params['threads'] = threads
+                    else:
+                        scan_params['threads'] = threads
                 except ValueError:
-                    print(f"Warning: Invalid thread count '{parts[i + 1]}', using default")
+                    print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Invalid thread count '{parts[i + 1]}', using default ({scan_params['threads']})")
                 i += 2
             elif arg == '--timeout' and i + 1 < len(parts):
                 try:
-                    scan_params['timeout'] = int(parts[i + 1])
+                    timeout = int(parts[i + 1])
+                    if timeout <= 0:
+                        print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Timeout must be positive, using default ({scan_params['timeout']}s)")
+                    elif timeout > 300:  # 5 minutes
+                        print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Very high timeout ({timeout}s) may cause long waits")
+                        scan_params['timeout'] = timeout
+                    else:
+                        scan_params['timeout'] = timeout
                 except ValueError:
-                    print(f"Warning: Invalid timeout '{parts[i + 1]}', using default")
+                    print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Invalid timeout '{parts[i + 1]}', using default ({scan_params['timeout']}s)")
                 i += 2
             elif arg == '--verbose':
                 scan_params['verbose'] = True
@@ -193,7 +207,7 @@ class ScanCommand:
                 scan_params['verbose'] = False
                 i += 1
             else:
-                print(f"Warning: Unknown argument '{arg}', ignoring")
+                print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Unknown argument '{arg}', ignoring")
                 i += 1
         
         return scan_params

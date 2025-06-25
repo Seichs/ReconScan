@@ -59,8 +59,11 @@ class HelpCommand:
             return True
             
         except Exception as e:
-            # HACK: Basic error handling - should use proper logging
+            # FIXME: Implement proper logging system for error tracking
             print(f"Error displaying help: {str(e)}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                print(f"Debug info: {traceback.format_exc()}")
             return False
     
     def _show_general_help(self):

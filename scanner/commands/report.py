@@ -169,7 +169,7 @@ class ReportCommand:
                     show_details = False
                     i += 1
                 else:
-                    print(f"Warning: Unknown option '{args[i]}'")
+                    print(f"\n[!] Warning: Unknown option '{args[i]}', ignoring")
                     i += 1
             
             # Load report data

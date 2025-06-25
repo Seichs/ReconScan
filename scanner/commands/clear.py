@@ -32,7 +32,7 @@ class ClearCommand:
             bool: True if screen was cleared and home displayed successfully
         """
         try:
-            # Clear the terminal screen
+            # Clear the terminal screen (Linux-based systems)
             os.system('clear')
             
             # Reuse the existing CLI display logic instead of duplicating code
@@ -41,7 +41,7 @@ class ClearCommand:
             return True
                 
         except Exception as e:
-            # HACK: Basic error handling - should use proper logging
+            # FIXME: Implement proper logging system for error tracking
             print(f"Error clearing screen: {str(e)}")
             return False
     
