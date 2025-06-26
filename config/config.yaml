@@ -51,29 +51,33 @@ modules:
 # Default payload configurations
 payload_defaults:
   sql_injection:
-    default_level: "basic"          # basic, medium, advanced
-    time_based_delay: 5             # seconds
+    default_level: "advanced"          # basic, medium, advanced - USE ADVANCED FOR BETTER DETECTION
+    time_based_delay: 3                # Reduced from 5 to 3 seconds for faster scanning
     error_based_enabled: true
     blind_enabled: true
     union_enabled: true
-    false_positive_filtering: true  # Enable intelligent false positive detection
+    false_positive_filtering: false    # DISABLE AI filtering for more thorough detection
+    max_payloads_per_param: 100        # Increased payload limit for comprehensive testing
   
   xss:
-    default_encoding: "standard"     # standard, advanced, all
+    default_encoding: "all"            # Changed from standard to all for better coverage
     dom_testing: true
     stored_testing: true
     reflected_testing: true
-    false_positive_filtering: true  # Enable intelligent false positive detection
+    false_positive_filtering: false    # DISABLE AI filtering for more thorough detection
+    max_payloads_per_param: 75         # Increased payload limit
   
   command_injection:
-    default_os: "auto"              # auto, linux, windows, both
-    time_based_delay: 3
+    default_os: "both"                 # Changed from auto to both for better coverage
+    time_based_delay: 2                # Reduced delay for faster scanning
     blind_enabled: true
+    max_payloads_per_param: 50
   
   lfi:
     directory_traversal: true
     wrapper_testing: true
     filter_bypass: true
+    max_payloads_per_param: 60
 
 # Integration settings for external tools
 integrations:
@@ -91,23 +95,27 @@ integrations:
     enabled: false
     tools_path: "/opt/security-tools"
 
-# Default network and scanning behavior
+# Default network and scanning behavior - OPTIMIZED FOR BETTER PERFORMANCE
 defaults:
   network:
     proxy: null
-    timeout: 10
+    timeout: 30                        # INCREASED from 10 to 30 seconds to prevent timeouts
     user_agent: "ReconScan/1.0"
     max_redirects: 5
     verify_ssl: false
-    retry_attempts: 3
+    retry_attempts: 2                  # Reduced from 3 to 2 for faster scanning
+    connection_pool_size: 100          # Added connection pooling
   
   scanning:
-    threads: 5
-    delay: 0.5
-    deep_scan: false
+    threads: 3                         # REDUCED from 5 to 3 to prevent rate limiting
+    delay: 1.0                         # INCREASED from 0.5 to 1.0 second delay to be more polite
+    deep_scan: true                    # ENABLED deep scanning for better coverage
     follow_redirects: true
-    scan_timeout: 300
-    max_urls: 1000
+    scan_timeout: 600                  # INCREASED from 300 to 600 seconds (10 minutes)
+    max_urls: 2000                     # INCREASED from 1000 to 2000 for better coverage
+    max_crawl_urls: 50                 # INCREASED crawling limit
+    max_discovered_urls: 100           # INCREASED discovery limit
+    max_urls_for_testing: 100          # INCREASED testing limit
   
   output:
     verbose: true

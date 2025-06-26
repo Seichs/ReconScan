@@ -32,14 +32,14 @@ class Colors:
 # Configuration constants for scan limits and thresholds
 class ScanLimits:
     MAX_THREAD_WARNING_THRESHOLD = 100
-    MAX_TIMEOUT_WARNING_THRESHOLD = 300  # 5 minutes in seconds
-    MAX_CRAWL_URLS = 10
-    MAX_DISCOVERED_URLS = 20
-    MAX_QUEUE_SIZE = 20
-    MAX_URLS_FOR_TESTING = 20
-    CRAWL_TIMEOUT_SECONDS = 5
-    MAX_DETAILS_DISPLAY = 5
-    MAX_VERBOSE_DISPLAY = 10
+    MAX_TIMEOUT_WARNING_THRESHOLD = 600  # 10 minutes in seconds
+    MAX_CRAWL_URLS = 50  # Increased from 10 to 50
+    MAX_DISCOVERED_URLS = 100  # Increased from 20 to 100
+    MAX_QUEUE_SIZE = 100  # Increased from 20 to 100
+    MAX_URLS_FOR_TESTING = 100  # Increased from 20 to 100
+    CRAWL_TIMEOUT_SECONDS = 10  # Increased from 5 to 10
+    MAX_DETAILS_DISPLAY = 10  # Increased from 5 to 10
+    MAX_VERBOSE_DISPLAY = 20  # Increased from 10 to 20
 
 # Import modular scanning components
 from .scanning.false_positive_filters import FalsePositiveFilters
