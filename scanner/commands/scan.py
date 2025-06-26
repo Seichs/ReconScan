@@ -74,9 +74,9 @@ class ScanCommand:
         
         # Initialize false positive filters once
         from scanner.commands.scanning.false_positive_filters import FalsePositiveFilters
-from scanner.ai import AIVulnerabilityValidator
-self.false_positive_filters = FalsePositiveFilters()
-self.ai_validator = AIVulnerabilityValidator()
+        from scanner.ai import AIVulnerabilityValidator
+        self.false_positive_filters = FalsePositiveFilters()
+        self.ai_validator = AIVulnerabilityValidator()
         
         # TODO: Implement lazy loading for better performance - scanners only loaded when needed
         # Cache for lazy-loaded scanners
