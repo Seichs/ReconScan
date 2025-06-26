@@ -74,7 +74,9 @@ class ScanCommand:
         
         # Initialize false positive filters once
         from scanner.commands.scanning.false_positive_filters import FalsePositiveFilters
-        self.false_positive_filters = FalsePositiveFilters()
+from scanner.ai import AIVulnerabilityValidator
+self.false_positive_filters = FalsePositiveFilters()
+self.ai_validator = AIVulnerabilityValidator()
         
         # TODO: Implement lazy loading for better performance - scanners only loaded when needed
         # Cache for lazy-loaded scanners
@@ -480,22 +482,22 @@ class ScanCommand:
         try:
             if module_name == 'sqli':
                 from scanner.commands.scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
-                scanner = SQLInjectionScanner()
+                scanner = SQLInjectionScanner(self.false_positive_filters, None, self.ai_validator)
             elif module_name == 'xss':
                 from scanner.commands.scanning.vulnerability_scanners.xss_scanner import XSSScanner
-                scanner = XSSScanner()
+                scanner = XSSScanner(self.ai_validator)
             elif module_name == 'lfi':
                 from scanner.commands.scanning.vulnerability_scanners.lfi_scanner import LFIScanner
-                scanner = LFIScanner()
+                scanner = LFIScanner(self.ai_validator)
             elif module_name == 'cmdinjection':
                 from scanner.commands.scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
-                scanner = CommandInjectionScanner()
+                scanner = CommandInjectionScanner(self.ai_validator)
             elif module_name == 'headers':
                 from scanner.commands.scanning.vulnerability_scanners.security_headers_scanner import SecurityHeadersScanner
-                scanner = SecurityHeadersScanner()
+                scanner = SecurityHeadersScanner()  # Security headers don't need AI validation
             elif module_name == 'dirtraversal':
                 from scanner.commands.scanning.vulnerability_scanners.directory_traversal_scanner import DirectoryTraversalScanner
-                scanner = DirectoryTraversalScanner()
+                scanner = DirectoryTraversalScanner(self.ai_validator)
             else:
                 return None
             
