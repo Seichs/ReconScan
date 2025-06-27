@@ -42,13 +42,8 @@ class ScanLimits:
     MAX_VERBOSE_DISPLAY = 20  # Increased from 10 to 20
 
 # Import modular scanning components
-from .scanning.false_positive_filters import FalsePositiveFilters
-# Note: SQL injection scanner will be rebuilt from ground up
-from .scanning.vulnerability_scanners.xss_scanner import XSSScanner
-from .scanning.vulnerability_scanners.lfi_scanner import LFIScanner
-from .scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
-from .scanning.vulnerability_scanners.security_headers_scanner import SecurityHeadersScanner
-from .scanning.vulnerability_scanners.directory_traversal_scanner import DirectoryTraversalScanner
+from .scanning.shared.false_positive_filters import FalsePositiveFilters
+# Note: Import paths updated for subdirectory structure
 
 class ScanCommand:
     """
@@ -73,7 +68,7 @@ class ScanCommand:
         self.config = self._load_scan_config()
         
         # Initialize false positive filters once
-        from scanner.commands.scanning.false_positive_filters import FalsePositiveFilters
+        from scanner.commands.scanning.shared.false_positive_filters import FalsePositiveFilters
         from scanner.ai import AIVulnerabilityValidator
         self.false_positive_filters = FalsePositiveFilters()
         self.ai_validator = AIVulnerabilityValidator()
@@ -84,7 +79,7 @@ class ScanCommand:
         
         # Available scan modules
         self.available_modules = {
-            # 'sqli': 'SQL Injection Detection',  # Will be rebuilt from ground up
+            'sqli': 'Professional SQL Injection Detection',  # Advanced SQL injection scanner integrated
             'xss': 'Cross-Site Scripting Detection', 
             'lfi': 'Local File Inclusion Detection',
             'cmdinjection': 'Command Injection Detection',
@@ -93,7 +88,7 @@ class ScanCommand:
         }
         
         # Default modules to run
-        self.default_modules = ['xss', 'headers']  # SQL injection removed, will be rebuilt
+        self.default_modules = ['sqli', 'xss', 'headers']  # SQL injection scanner now integrated
         
         # Scan results storage
         self.results = {
@@ -481,23 +476,22 @@ class ScanCommand:
         # Lazy import and initialize scanners
         try:
             if module_name == 'sqli':
-                # SQL injection scanner removed - will be rebuilt from ground up
-                print("SQL injection scanner is being rebuilt from ground up")
-                return None
+                from scanner.commands.scanning.vulnerability_scanners.sql_injection.sql_injection_adapter import SQLInjectionScannerAdapter
+                scanner = SQLInjectionScannerAdapter(ai_validator=self.ai_validator)
             elif module_name == 'xss':
-                from scanner.commands.scanning.vulnerability_scanners.xss_scanner import XSSScanner
+                from scanner.commands.scanning.vulnerability_scanners.xss.xss_scanner import XSSScanner
                 scanner = XSSScanner(self.ai_validator)
             elif module_name == 'lfi':
-                from scanner.commands.scanning.vulnerability_scanners.lfi_scanner import LFIScanner
+                from scanner.commands.scanning.vulnerability_scanners.lfi.lfi_scanner import LFIScanner
                 scanner = LFIScanner(self.ai_validator)
             elif module_name == 'cmdinjection':
-                from scanner.commands.scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
+                from scanner.commands.scanning.vulnerability_scanners.command_injection.command_injection_scanner import CommandInjectionScanner
                 scanner = CommandInjectionScanner(self.ai_validator)
             elif module_name == 'headers':
-                from scanner.commands.scanning.vulnerability_scanners.security_headers_scanner import SecurityHeadersScanner
+                from scanner.commands.scanning.vulnerability_scanners.security_headers.security_headers_scanner import SecurityHeadersScanner
                 scanner = SecurityHeadersScanner()  # Security headers don't need AI validation
             elif module_name == 'dirtraversal':
-                from scanner.commands.scanning.vulnerability_scanners.directory_traversal_scanner import DirectoryTraversalScanner
+                from scanner.commands.scanning.vulnerability_scanners.directory_traversal.directory_traversal_scanner import DirectoryTraversalScanner
                 scanner = DirectoryTraversalScanner(self.ai_validator)
             else:
                 return None

@@ -1,0 +1,442 @@
+{
+  "report_metadata": {
+    "generated_at": "2025-06-27T19:13:05.783625",
+    "report_type": "educational_security_assessment",
+    "version": "1.0.0",
+    "education_level": "advanced"
+  },
+  "scan_information": {
+    "target": "https://vulnerable-app.com",
+    "scan_date": "2025-06-27 19:13:05",
+    "scan_duration": "45 seconds",
+    "scanner_version": "ReconScan 1.0.0",
+    "total_requests": 1250,
+    "parameters_tested": 47
+  },
+  "executive_summary": {
+    "total_vulnerabilities": 5,
+    "risk_distribution": {
+      "critical": 2,
+      "high": 2,
+      "medium": 1,
+      "low": 0
+    },
+    "key_findings": [
+      "Critical SQL injection vulnerability allows database compromise",
+      "XSS vulnerability enables client-side attacks",
+      "Command injection provides system-level access",
+      "Missing security headers reduce defense in depth"
+    ]
+  },
+  "educational_vulnerabilities": [
+    {
+      "id": "VULN-001",
+      "name": "SQL Injection",
+      "category": "sql_injection",
+      "severity": "CRITICAL",
+      "technical_details": {
+        "url": "https://vulnerable-app.com/login",
+        "parameter": "username",
+        "method": "POST",
+        "payload": "admin' OR '1'='1",
+        "evidence": "MySQL syntax error in query"
+      },
+      "educational_content": {
+        "description": "SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.",
+        "business_impact": "\nSQL injection represents one of the most severe security vulnerabilities, with potential impacts including:\n\n• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data\n• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage\n• **Business Disruption**: System downtime, data corruption, and loss of customer trust\n• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)\n• **Competitive Disadvantage**: Loss of intellectual property and trade secrets\n                ",
+        "attack_scenarios": [
+          "Authentication Bypass: Attacker bypasses login mechanisms using '1'='1' or similar tautologies",
+          "Data Extraction: Systematic extraction of sensitive data using UNION-based attacks",
+          "Blind Inference: Information gathering through Boolean-based and time-based blind attacks",
+          "Database Fingerprinting: Identifying database type, version, and structure for targeted attacks",
+          "Privilege Escalation: Exploiting database functions to gain administrative access",
+          "Data Manipulation: Modifying or deleting critical business data",
+          "Second-Order Attacks: Stored malicious input executed in different application contexts"
+        ],
+        "remediation_steps": [
+          {
+            "step": 1,
+            "title": "Implement Parameterized Queries",
+            "description": "Use prepared statements or parameterized queries to separate SQL logic from data",
+            "priority": "critical",
+            "effort": "medium"
+          },
+          {
+            "step": 2,
+            "title": "Input Validation",
+            "description": "Validate and sanitize all user inputs before processing",
+            "priority": "high",
+            "effort": "low"
+          },
+          {
+            "step": 3,
+            "title": "Principle of Least Privilege",
+            "description": "Configure database user with minimal required permissions",
+            "priority": "high",
+            "effort": "medium"
+          },
+          {
+            "step": 4,
+            "title": "Error Handling",
+            "description": "Implement proper error handling to prevent information disclosure",
+            "priority": "medium",
+            "effort": "low"
+          }
+        ],
+        "learning_resources": [
+          {
+            "title": "OWASP SQL Injection Prevention Cheat Sheet",
+            "description": "Comprehensive guide to preventing SQL injection vulnerabilities",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
+            "type": "documentation",
+            "difficulty": "intermediate"
+          },
+          {
+            "title": "PortSwigger Web Security Academy - SQL Injection",
+            "description": "Interactive labs and tutorials on SQL injection attacks and defenses",
+            "url": "https://portswigger.net/web-security/sql-injection",
+            "type": "course",
+            "difficulty": "beginner"
+          },
+          {
+            "title": "SQLMap Documentation",
+            "description": "Advanced SQL injection exploitation tool documentation",
+            "url": "https://sqlmap.org/",
+            "type": "tool",
+            "difficulty": "advanced"
+          }
+        ]
+      },
+      "compliance": {
+        "owasp_category": "A03:2021 – Injection",
+        "cwe_id": "CWE-89, CWE-564, CWE-943",
+        "cvss_score": 9.8
+      },
+      "risk_assessment": {
+        "exploitability": "high",
+        "prevalence": "common",
+        "detectability": "easy"
+      }
+    },
+    {
+      "id": "VULN-002",
+      "name": "SQL Injection",
+      "category": "sql_injection",
+      "severity": "HIGH",
+      "technical_details": {
+        "url": "https://vulnerable-app.com/search",
+        "parameter": "q",
+        "method": "GET",
+        "payload": "<script>alert('XSS')</script>",
+        "evidence": "Script executed in response"
+      },
+      "educational_content": {
+        "description": "SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.",
+        "business_impact": "\nSQL injection represents one of the most severe security vulnerabilities, with potential impacts including:\n\n• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data\n• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage\n• **Business Disruption**: System downtime, data corruption, and loss of customer trust\n• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)\n• **Competitive Disadvantage**: Loss of intellectual property and trade secrets\n                ",
+        "attack_scenarios": [
+          "Authentication Bypass: Attacker bypasses login mechanisms using '1'='1' or similar tautologies",
+          "Data Extraction: Systematic extraction of sensitive data using UNION-based attacks",
+          "Blind Inference: Information gathering through Boolean-based and time-based blind attacks",
+          "Database Fingerprinting: Identifying database type, version, and structure for targeted attacks",
+          "Privilege Escalation: Exploiting database functions to gain administrative access",
+          "Data Manipulation: Modifying or deleting critical business data",
+          "Second-Order Attacks: Stored malicious input executed in different application contexts"
+        ],
+        "remediation_steps": [
+          {
+            "step": 1,
+            "title": "Implement Parameterized Queries",
+            "description": "Use prepared statements or parameterized queries to separate SQL logic from data",
+            "priority": "critical",
+            "effort": "medium"
+          },
+          {
+            "step": 2,
+            "title": "Input Validation",
+            "description": "Validate and sanitize all user inputs before processing",
+            "priority": "high",
+            "effort": "low"
+          },
+          {
+            "step": 3,
+            "title": "Principle of Least Privilege",
+            "description": "Configure database user with minimal required permissions",
+            "priority": "high",
+            "effort": "medium"
+          },
+          {
+            "step": 4,
+            "title": "Error Handling",
+            "description": "Implement proper error handling to prevent information disclosure",
+            "priority": "medium",
+            "effort": "low"
+          }
+        ],
+        "learning_resources": [
+          {
+            "title": "OWASP SQL Injection Prevention Cheat Sheet",
+            "description": "Comprehensive guide to preventing SQL injection vulnerabilities",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
+            "type": "documentation",
+            "difficulty": "intermediate"
+          },
+          {
+            "title": "PortSwigger Web Security Academy - SQL Injection",
+            "description": "Interactive labs and tutorials on SQL injection attacks and defenses",
+            "url": "https://portswigger.net/web-security/sql-injection",
+            "type": "course",
+            "difficulty": "beginner"
+          },
+          {
+            "title": "SQLMap Documentation",
+            "description": "Advanced SQL injection exploitation tool documentation",
+            "url": "https://sqlmap.org/",
+            "type": "tool",
+            "difficulty": "advanced"
+          }
+        ]
+      },
+      "compliance": {
+        "owasp_category": "A03:2021 – Injection",
+        "cwe_id": "CWE-89, CWE-564, CWE-943",
+        "cvss_score": 9.8
+      },
+      "risk_assessment": {
+        "exploitability": "high",
+        "prevalence": "common",
+        "detectability": "easy"
+      }
+    },
+    {
+      "id": "VULN-003",
+      "name": "Command Injection",
+      "category": "command_injection",
+      "severity": "CRITICAL",
+      "technical_details": {
+        "url": "https://vulnerable-app.com/ping",
+        "parameter": "host",
+        "method": "POST",
+        "payload": "127.0.0.1; whoami",
+        "evidence": "Command output in response"
+      },
+      "educational_content": {
+        "description": "Command injection occurs when applications execute system commands using unvalidated user input, allowing attackers to execute arbitrary commands on the host operating system.",
+        "business_impact": "\nCommand injection represents a critical security risk with severe potential impacts:\n\n• **Complete System Compromise**: Full control over the host operating system and infrastructure\n• **Data Exfiltration**: Access to all files and databases on the compromised system\n• **Lateral Movement**: Using compromised systems as launching points for further attacks\n• **Service Disruption**: System downtime, data destruction, and operational impact\n• **Compliance Violations**: Breach of security controls and regulatory requirements\n• **Intellectual Property Theft**: Access to source code, algorithms, and trade secrets\n                ",
+        "attack_scenarios": [
+          "System Takeover: Executing administrative commands to gain full system control",
+          "Data Exfiltration: Using command utilities to access and transfer sensitive files",
+          "Backdoor Installation: Installing persistent access mechanisms for future exploitation",
+          "Network Reconnaissance: Scanning internal networks and identifying additional targets",
+          "Privilege Escalation: Exploiting system vulnerabilities to gain higher privileges",
+          "Log Manipulation: Altering system logs to hide attack traces",
+          "Resource Exploitation: Using compromised systems for cryptocurrency mining or botnets"
+        ],
+        "remediation_steps": [
+          {
+            "step": 1,
+            "title": "Avoid System Commands",
+            "description": "Use safe APIs instead of executing system commands",
+            "priority": "critical",
+            "effort": "high"
+          },
+          {
+            "step": 2,
+            "title": "Input Sanitization",
+            "description": "Whitelist allowed characters and escape shell metacharacters",
+            "priority": "critical",
+            "effort": "medium"
+          },
+          {
+            "step": 3,
+            "title": "Subprocess Security",
+            "description": "Use secure subprocess execution with proper argument handling",
+            "priority": "high",
+            "effort": "medium"
+          }
+        ],
+        "learning_resources": [
+          {
+            "title": "OWASP Command Injection Defense",
+            "description": "Best practices for preventing command injection vulnerabilities",
+            "url": "https://owasp.org/www-community/attacks/Command_Injection",
+            "type": "documentation",
+            "difficulty": "intermediate"
+          },
+          {
+            "title": "Input Validation and Sanitization Guide",
+            "description": "Comprehensive approach to secure input handling",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html",
+            "type": "documentation",
+            "difficulty": "beginner"
+          }
+        ]
+      },
+      "compliance": {
+        "owasp_category": "A03:2021 – Injection",
+        "cwe_id": "CWE-77, CWE-78, CWE-88",
+        "cvss_score": 9.8
+      },
+      "risk_assessment": {
+        "exploitability": "high",
+        "prevalence": "uncommon",
+        "detectability": "medium"
+      }
+    },
+    {
+      "id": "VULN-004",
+      "name": "Directory Traversal",
+      "category": "directory_traversal",
+      "severity": "HIGH",
+      "technical_details": {
+        "url": "https://vulnerable-app.com/download",
+        "parameter": "file",
+        "method": "GET",
+        "payload": "../../../etc/passwd",
+        "evidence": "System file contents revealed"
+      },
+      "educational_content": {
+        "description": "Directory traversal vulnerabilities allow attackers to access files and directories outside the intended application scope by manipulating file path references.",
+        "business_impact": "\nDirectory traversal vulnerabilities can lead to significant security breaches:\n\n• **Sensitive File Exposure**: Access to configuration files, passwords, and system information\n• **Source Code Disclosure**: Exposure of application logic and potential additional vulnerabilities\n• **System Information Leakage**: Details about server configuration and infrastructure\n• **Credential Theft**: Access to password files and authentication tokens\n• **Compliance Violations**: Unauthorized access to regulated data and information\n• **Intellectual Property Loss**: Exposure of proprietary algorithms and business logic\n                ",
+        "attack_scenarios": [
+          "Configuration File Access: Reading database credentials from configuration files",
+          "Password File Extraction: Accessing system password files (/etc/passwd, /etc/shadow)",
+          "Log File Analysis: Examining log files for sensitive information and attack vectors",
+          "Application Source Review: Analyzing source code for additional vulnerabilities",
+          "SSL Certificate Theft: Accessing private keys and certificates",
+          "Backup File Discovery: Finding and accessing backup files with sensitive data",
+          "System Reconnaissance: Gathering information about system architecture and services"
+        ],
+        "remediation_steps": [
+          {
+            "step": 1,
+            "title": "Path Validation",
+            "description": "Validate and canonicalize file paths before processing",
+            "priority": "critical",
+            "effort": "medium"
+          },
+          {
+            "step": 2,
+            "title": "Whitelist Approach",
+            "description": "Use whitelist of allowed files/directories instead of blacklist",
+            "priority": "high",
+            "effort": "medium"
+          },
+          {
+            "step": 3,
+            "title": "Chroot Jail",
+            "description": "Implement chroot jail to restrict file system access",
+            "priority": "medium",
+            "effort": "high"
+          }
+        ],
+        "learning_resources": [
+          {
+            "title": "Path Traversal Prevention Techniques",
+            "description": "Methods to prevent directory traversal vulnerabilities",
+            "url": "https://owasp.org/www-community/attacks/Path_Traversal",
+            "type": "documentation",
+            "difficulty": "intermediate"
+          },
+          {
+            "title": "Secure File Handling Best Practices",
+            "description": "Guidelines for secure file operations in web applications",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+            "type": "documentation",
+            "difficulty": "intermediate"
+          }
+        ]
+      },
+      "compliance": {
+        "owasp_category": "A01:2021 – Broken Access Control",
+        "cwe_id": "CWE-22, CWE-23, CWE-36",
+        "cvss_score": 7.5
+      },
+      "risk_assessment": {
+        "exploitability": "medium",
+        "prevalence": "common",
+        "detectability": "easy"
+      }
+    },
+    {
+      "id": "VULN-005",
+      "name": "Missing Security Headers",
+      "category": "security_headers",
+      "severity": "MEDIUM",
+      "technical_details": {
+        "url": "https://vulnerable-app.com/",
+        "parameter": "N/A",
+        "method": "GET",
+        "payload": "N/A",
+        "evidence": "No CSP, HSTS, or X-Frame-Options headers"
+      },
+      "educational_content": {
+        "description": "Security headers are HTTP response headers that help protect web applications from various attacks by instructing browsers how to handle content and enforce security policies.",
+        "business_impact": "\nMissing security headers expose applications to various risks:\n\n• **Increased Attack Surface**: Vulnerability to clickjacking, XSS, and injection attacks\n• **Data Leakage**: Uncontrolled referrer information and content type sniffing\n• **Man-in-the-Middle Attacks**: Lack of transport security enforcement\n• **Compliance Issues**: Failure to implement security best practices\n• **Brand Damage**: Security incidents due to preventable vulnerabilities\n• **User Trust**: Reduced confidence in application security\n                ",
+        "attack_scenarios": [
+          "Clickjacking: Embedding legitimate sites in malicious frames to trick users",
+          "XSS Exploitation: Bypassing weak content security policies",
+          "MITM Attacks: Intercepting traffic due to lack of transport security",
+          "Content Sniffing: Exploiting browser MIME type confusion",
+          "Information Disclosure: Leaking sensitive data through referrer headers",
+          "Cache Poisoning: Manipulating cached content without proper headers"
+        ],
+        "remediation_steps": [
+          {
+            "step": 1,
+            "title": "Implement Security Headers",
+            "description": "Add missing security headers to HTTP responses",
+            "priority": "high",
+            "effort": "low"
+          },
+          {
+            "step": 2,
+            "title": "Configure CSP",
+            "description": "Set up Content Security Policy appropriate for your application",
+            "priority": "high",
+            "effort": "medium"
+          },
+          {
+            "step": 3,
+            "title": "Enable HSTS",
+            "description": "Configure HTTP Strict Transport Security for HTTPS enforcement",
+            "priority": "medium",
+            "effort": "low"
+          }
+        ],
+        "learning_resources": [
+          {
+            "title": "OWASP Secure Headers Project",
+            "description": "Comprehensive guide to implementing security headers",
+            "url": "https://owasp.org/www-project-secure-headers/",
+            "type": "documentation",
+            "difficulty": "beginner"
+          },
+          {
+            "title": "Security Headers Quick Reference",
+            "description": "Fast reference for all important security headers",
+            "url": "https://securityheaders.com/",
+            "type": "tool",
+            "difficulty": "beginner"
+          },
+          {
+            "title": "Content Security Policy Generator",
+            "description": "Interactive tool for generating CSP policies",
+            "url": "https://report-uri.com/home/generate",
+            "type": "tool",
+            "difficulty": "intermediate"
+          }
+        ]
+      },
+      "compliance": {
+        "owasp_category": "A05:2021 – Security Misconfiguration",
+        "cwe_id": "CWE-16, CWE-693, CWE-1021",
+        "cvss_score": 4.3
+      },
+      "risk_assessment": {
+        "exploitability": "low",
+        "prevalence": "widespread",
+        "detectability": "easy"
+      }
+    }
+  ]
+}

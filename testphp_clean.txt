@@ -1,0 +1,116 @@
+================================================================================
+RECONSCAN VULNERABILITY SCAN REPORT
+================================================================================
+
+SCAN INFORMATION
+----------------------------------------
+Target: http://testphp.vulnweb.com/listproducts.php?cat=1
+Start Time: 2025-06-27 20:24:40
+Duration: 135.77s
+Modules: sqli
+Scanner Version: 0.3.01-dev
+
+SUMMARY
+----------------------------------------
+Total Vulnerabilities: 11
+  High: 11
+
+DETAILED VULNERABILITIES
+----------------------------------------
+
+[1] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=1
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[2] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/artists.php?artist=1
+    Method: GET
+    Parameter: artist (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'artist (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[3] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/listproducts.php?cat=1
+    Method: GET
+    Parameter: cat (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'cat (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[4] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=2
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[5] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=3
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[6] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=4
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[7] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=5
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[8] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/product.php?pic=7
+    Method: GET
+    Parameter: pic (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[9] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/artists.php?artist=2
+    Method: GET
+    Parameter: artist (GET)
+    Payload:  AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'artist (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[10] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/search.php?test=query?searchFor=test
+    Method: GET
+    Parameter: test (GET)
+    Payload: ' AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'test (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+[11] SQL Injection (Boolean-based blind)
+    Severity: High
+    URL: http://testphp.vulnweb.com/search.php?test=query?goButton=test
+    Method: GET
+    Parameter: test (GET)
+    Payload: ' AND LEN(DATABASE())>0#
+    Description: SQL injection vulnerability detected in parameter 'test (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.
+
+================================================================================
+Generated by ReconScan Security Scanner
+Report saved: 2025-06-27 20:26:56
+================================================================================
+
+NOTE: For comprehensive learning and educational content,
+use the 'report generate' command to create detailed
+educational security reports with remediation guidance.

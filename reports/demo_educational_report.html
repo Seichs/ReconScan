@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Security Assessment Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header Styles */
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        
+        /* Navigation */
+        .nav { background: #f8f9fa; padding: 15px 0; margin-bottom: 30px; border-radius: 8px; }
+        .nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 20px; }
+        .nav a { text-decoration: none; color: #495057; padding: 8px 16px; border-radius: 4px; transition: all 0.3s; }
+        .nav a:hover { background: #e9ecef; color: #007bff; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden; }
+        .card-header { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+        .card-body { padding: 25px; }
+        .card-title { font-size: 1.5em; margin-bottom: 10px; color: #2c3e50; }
+        
+        /* Severity Badges */
+        .severity { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; text-transform: uppercase; }
+        .severity.critical { background: #fee2e2; color: #dc2626; }
+        .severity.high { background: #fed7aa; color: #ea580c; }
+        .severity.medium { background: #fef3c7; color: #d97706; }
+        .severity.low { background: #d1fae5; color: #059669; }
+        .severity.info { background: #dbeafe; color: #0284c7; }
+        
+        /* Progress Bars */
+        .progress { background: #e9ecef; border-radius: 4px; height: 8px; margin: 10px 0; }
+        .progress-bar { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        
+        /* Code Blocks */
+        .code-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 20px; margin: 15px 0; }
+        .code-block pre { font-family: 'Courier New', monospace; font-size: 0.9em; overflow-x: auto; }
+        .code-vulnerable { border-left: 4px solid #dc2626; }
+        .code-secure { border-left: 4px solid #059669; }
+        
+        /* Learning Elements */
+        .learning-box { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .learning-box h4 { color: #0284c7; margin-bottom: 10px; }
+        
+        /* Knowledge Check */
+        .knowledge-check { background: #fefce8; border: 1px solid #eab308; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .knowledge-check h4 { color: #ca8a04; margin-bottom: 15px; }
+        
+        /* Risk Matrix */
+        .risk-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        .risk-cell { padding: 15px; text-align: center; border-radius: 6px; font-weight: 600; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header h1 { font-size: 2em; }
+            .nav ul { flex-direction: column; }
+            .risk-matrix { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .nav { display: none; }
+            .card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+            
+<div class="header">
+    <div class="container">
+        <h1>🎓 Educational Security Assessment Report</h1>
+        <p>Comprehensive vulnerability analysis with learning resources and remediation guidance</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul>
+            <li><a href="#executive-summary">Executive Summary</a></li>
+            <li><a href="#vulnerabilities">Vulnerabilities</a></li>
+            <li><a href="#remediation">Remediation Guide</a></li>
+            <li><a href="#learning-resources">Learning Resources</a></li>
+            <li><a href="#compliance">Compliance</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Executive Summary -->
+    <section id="executive-summary" class="card">
+        <div class="card-header">
+            <h2 class="card-title">📊 Executive Summary</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Scan Target:</strong> https://vulnerable-app.com</p>
+            <p><strong>Scan Date:</strong> 2025-06-27 19:13:05</p>
+            <p><strong>Total Vulnerabilities:</strong> 5</p>
+            
+            <div style="margin: 20px 0;">
+                <h3>Risk Distribution</h3>
+                <div class="risk-matrix">
+                    <div class="risk-cell" style="background: #fee2e2; color: #dc2626;">
+                        Critical: 2
+                    </div>
+                    <div class="risk-cell" style="background: #fed7aa; color: #ea580c;">
+                        High: 2
+                    </div>
+                    <div class="risk-cell" style="background: #fef3c7; color: #d97706;">
+                        Medium: 1
+                    </div>
+                    <div class="risk-cell" style="background: #d1fae5; color: #059669;">
+                        Low: 0
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Vulnerabilities Section -->
+    <section id="vulnerabilities">
+        <h2 style="margin: 30px 0 20px 0;">🔍 Detailed Vulnerability Analysis</h2>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> https://vulnerable-app.com/login</p>
+                <p><strong>Parameter:</strong> username</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-001">
+                        <label><input type="radio" name="qVULN-001" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-001" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-001" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-001" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-001')">Show Answer</button>
+                    <div id="answer-VULN-001" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> https://vulnerable-app.com/search</p>
+                <p><strong>Parameter:</strong> q</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-002">
+                        <label><input type="radio" name="qVULN-002" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-002" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-002" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-002" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-002')">Show Answer</button>
+                    <div id="answer-VULN-002" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Command Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> https://vulnerable-app.com/ping</p>
+                <p><strong>Parameter:</strong> host</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-77, CWE-78, CWE-88</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>Command injection occurs when applications execute system commands using unvalidated user input, allowing attackers to execute arbitrary commands on the host operating system.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+Command injection vulnerabilities arise when applications construct system commands using 
+user-supplied input without proper validation or sanitization. This allows attackers to 
+inject additional commands or modify the intended command execution, potentially gaining 
+full control over the host system.
+
+The vulnerability typically occurs when applications use functions like system(), exec(), 
+or shell_exec() with user-controlled data. Command separators (;, &&, ||, |) and command 
+substitution operators (`, $()) can be used to chain additional commands or execute 
+arbitrary code within the same execution context.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+Command injection represents a critical security risk with severe potential impacts:
+
+• **Complete System Compromise**: Full control over the host operating system and infrastructure
+• **Data Exfiltration**: Access to all files and databases on the compromised system
+• **Lateral Movement**: Using compromised systems as launching points for further attacks
+• **Service Disruption**: System downtime, data destruction, and operational impact
+• **Compliance Violations**: Breach of security controls and regulatory requirements
+• **Intellectual Property Theft**: Access to source code, algorithms, and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Avoid System Commands:</strong> Use safe APIs instead of executing system commands</li><li><strong>Input Sanitization:</strong> Whitelist allowed characters and escape shell metacharacters</li><li><strong>Subprocess Security:</strong> Use secure subprocess execution with proper argument handling</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+import os
+filename = request.form[&#x27;filename&#x27;]
+os.system(f&quot;cat {filename}&quot;)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+import subprocess
+filename = request.form[&#x27;filename&#x27;]
+# Validate filename first
+if not re.match(r&#x27;^[a-zA-Z0-9._-]+$&#x27;, filename):
+    raise ValueError(&quot;Invalid filename&quot;)
+subprocess.run([&#x27;cat&#x27;, filename], check=True)</pre>
+                    <p><em>Use subprocess with argument lists and validate inputs</em></p>
+                </div>
+                
+                
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://owasp.org/www-community/attacks/Command_Injection" target="_blank">OWASP Command Injection Defense</a> - Best practices for preventing command injection vulnerabilities</li><li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" target="_blank">Input Validation and Sanitization Guide</a> - Comprehensive approach to secure input handling</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Directory Traversal</h3>
+                <span class="severity high">HIGH</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> https://vulnerable-app.com/download</p>
+                <p><strong>Parameter:</strong> file</p>
+                <p><strong>OWASP Category:</strong> A01:2021 – Broken Access Control</p>
+                <p><strong>CWE:</strong> CWE-22, CWE-23, CWE-36</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>Directory traversal vulnerabilities allow attackers to access files and directories outside the intended application scope by manipulating file path references.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+Directory traversal (path traversal) vulnerabilities occur when applications use user-supplied 
+input to construct file paths without proper validation. Attackers can use special characters 
+like '../' (dot-dot-slash) to navigate outside the intended directory structure and access 
+sensitive files on the server.
+
+This vulnerability commonly affects file upload functionality, document viewers, and any 
+feature that processes file paths. The attack exploits the way operating systems resolve 
+relative paths, allowing traversal to parent directories and access to system files, 
+configuration files, and other sensitive resources.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+Directory traversal vulnerabilities can lead to significant security breaches:
+
+• **Sensitive File Exposure**: Access to configuration files, passwords, and system information
+• **Source Code Disclosure**: Exposure of application logic and potential additional vulnerabilities
+• **System Information Leakage**: Details about server configuration and infrastructure
+• **Credential Theft**: Access to password files and authentication tokens
+• **Compliance Violations**: Unauthorized access to regulated data and information
+• **Intellectual Property Loss**: Exposure of proprietary algorithms and business logic
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Path Validation:</strong> Validate and canonicalize file paths before processing</li><li><strong>Whitelist Approach:</strong> Use whitelist of allowed files/directories instead of blacklist</li><li><strong>Chroot Jail:</strong> Implement chroot jail to restrict file system access</li>
+                    </ol>
+                </div>
+                
+                
+                
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank">Path Traversal Prevention Techniques</a> - Methods to prevent directory traversal vulnerabilities</li><li><a href="https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html" target="_blank">Secure File Handling Best Practices</a> - Guidelines for secure file operations in web applications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Missing Security Headers</h3>
+                <span class="severity medium">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> https://vulnerable-app.com/</p>
+                <p><strong>Parameter:</strong> N/A</p>
+                <p><strong>OWASP Category:</strong> A05:2021 – Security Misconfiguration</p>
+                <p><strong>CWE:</strong> CWE-16, CWE-693, CWE-1021</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>Security headers are HTTP response headers that help protect web applications from various attacks by instructing browsers how to handle content and enforce security policies.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+Security headers provide defense-in-depth protection by leveraging browser security features. 
+When applications fail to implement proper security headers, they miss critical opportunities 
+to protect users from various attacks including XSS, clickjacking, MITM attacks, and 
+information disclosure.
+
+Key security headers include:
+• Content-Security-Policy (CSP): Prevents XSS and data injection attacks
+• X-Frame-Options: Protects against clickjacking attacks
+• Strict-Transport-Security (HSTS): Enforces HTTPS connections
+• X-Content-Type-Options: Prevents MIME type sniffing attacks
+• Referrer-Policy: Controls referrer information leakage
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+Missing security headers expose applications to various risks:
+
+• **Increased Attack Surface**: Vulnerability to clickjacking, XSS, and injection attacks
+• **Data Leakage**: Uncontrolled referrer information and content type sniffing
+• **Man-in-the-Middle Attacks**: Lack of transport security enforcement
+• **Compliance Issues**: Failure to implement security best practices
+• **Brand Damage**: Security incidents due to preventable vulnerabilities
+• **User Trust**: Reduced confidence in application security
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Security Headers:</strong> Add missing security headers to HTTP responses</li><li><strong>Configure CSP:</strong> Set up Content Security Policy appropriate for your application</li><li><strong>Enable HSTS:</strong> Configure HTTP Strict Transport Security for HTTPS enforcement</li>
+                    </ol>
+                </div>
+                
+                
+                
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://owasp.org/www-project-secure-headers/" target="_blank">OWASP Secure Headers Project</a> - Comprehensive guide to implementing security headers</li><li><a href="https://securityheaders.com/" target="_blank">Security Headers Quick Reference</a> - Fast reference for all important security headers</li><li><a href="https://report-uri.com/home/generate" target="_blank">Content Security Policy Generator</a> - Interactive tool for generating CSP policies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    
+    <!-- Learning Resources -->
+    <section id="learning-resources" class="card">
+        <div class="card-header">
+            <h2 class="card-title">📚 Additional Learning Resources</h2>
+        </div>
+        <div class="card-body">
+            <div class="learning-box">
+                <h4>🎯 Recommended Next Steps</h4>
+                <ul>
+                    <li>Review OWASP Top 10 vulnerabilities</li>
+                    <li>Practice with security testing tools</li>
+                    <li>Implement secure coding practices</li>
+                    <li>Set up continuous security testing</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+
+    <footer style="background: #f8f9fa; padding: 30px 0; margin-top: 50px; text-align: center; color: #6c757d;">
+        <div class="container">
+            <p>Report generated by ReconScan Educational Security Framework</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">
+                This report is for educational purposes. Use findings responsibly and in accordance with applicable laws.
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        // Interactive elements for learning
+        function toggleSection(id) {
+            const element = document.getElementById(id);
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showAnswer(id) {
+            const answer = document.getElementById(id);
+            answer.style.display = 'block';
+        }
+        
+        // Learning progress tracking
+        let learningProgress = JSON.parse(localStorage.getItem('reconScanProgress') || '{}');
+        
+        function markLearned(topic) {
+            learningProgress[topic] = new Date().toISOString();
+            localStorage.setItem('reconScanProgress', JSON.stringify(learningProgress));
+            updateProgressBars();
+        }
+        
+        function updateProgressBars() {
+            // Update progress visualization
+            const topics = Object.keys(learningProgress);
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                const topic = bar.dataset.topic;
+                if (learningProgress[topic]) {
+                    bar.style.width = '100%';
+                    bar.style.background = '#059669';
+                }
+            });
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', updateProgressBars);
+    </script>
+</body>
+</html>
+            
