@@ -617,18 +617,145 @@ class ScanCommand:
             print("   Target appears to be properly secured against tested attack vectors")
     
     def _save_results(self, output_file):
-        """Save scan results to formatted text file using ReportCommand."""
+        """Save scan results in all three formats (TXT, JSON, HTML) automatically."""
         try:
-            # Import ReportCommand to use its report generation
+            from pathlib import Path
             from scanner.commands.report import ReportCommand
+            from scanner.commands.scanning.vulnerability_scanners.educational_security_reporter import EducationalSecurityReporter
             
-            # Use ReportCommand to generate and save the report
-            output_path = ReportCommand.save_scan_results(self.results, output_file)
+            # Create results directory in project root
+            results_dir = Path("results")
+            results_dir.mkdir(exist_ok=True)
             
-            print(f"\nResults saved to: {output_path}")
+            # Get base filename without extension  
+            base_name = Path(output_file).stem
+            
+            generated_files = []
+            
+            print(f"\n{Colors.CYAN}[*]{Colors.ENDC} Generating multi-format reports...")
+            
+            # 1. Generate TXT report (traditional scan results)
+            txt_path = results_dir / f"{base_name}.txt"
+            txt_file = ReportCommand._save_text_report(self.results, txt_path)
+            generated_files.append(txt_file)
+            print(f"  {Colors.GREEN}[+]{Colors.ENDC} TXT report: {txt_file}")
+            
+            # 2. Generate JSON report (structured data)
+            json_path = results_dir / f"{base_name}.json"
+            with open(json_path, 'w', encoding='utf-8') as f:
+                import json
+                json.dump(self.results, f, indent=2, ensure_ascii=False)
+            generated_files.append(str(json_path))
+            print(f"  {Colors.GREEN}[+]{Colors.ENDC} JSON report: {json_path}")
+            
+            # 3. Generate HTML educational report (interactive learning)
+            html_path = results_dir / f"{base_name}.html"
+            try:
+                reporter = EducationalSecurityReporter()
+                
+                # Extract vulnerabilities for educational enhancement
+                vulnerabilities = self.results.get('vulnerabilities', [])
+                if vulnerabilities:
+                    # Generate educational report
+                    success = reporter.generate_educational_report(
+                        vulnerabilities=vulnerabilities,
+                        scan_metadata=self.results.get('scan_info', {}),
+                        output_path=str(html_path),
+                        format_type='html'
+                    )
+                    
+                    if success:
+                        generated_files.append(str(html_path))
+                        print(f"  {Colors.GREEN}[+]{Colors.ENDC} HTML educational report: {html_path}")
+                    else:
+                        print(f"  {Colors.YELLOW}[!]{Colors.ENDC} HTML report generation failed")
+                else:
+                    # Create basic HTML report even without vulnerabilities
+                    self._create_basic_html_report(html_path)
+                    generated_files.append(str(html_path))
+                    print(f"  {Colors.GREEN}[+]{Colors.ENDC} HTML basic report: {html_path}")
+                    
+            except ImportError:
+                print(f"  {Colors.YELLOW}[!]{Colors.ENDC} Educational reporter not available, skipping HTML")
+            except Exception as e:
+                print(f"  {Colors.YELLOW}[!]{Colors.ENDC} HTML report error: {e}")
+            
+            # Summary
+            print(f"\n{Colors.BLUE}[*]{Colors.ENDC} Report generation complete!")
+            print(f"  Generated {len(generated_files)} files in results/ directory:")
+            for file_path in generated_files:
+                file_size = Path(file_path).stat().st_size
+                print(f"    • {Path(file_path).name} ({file_size:,} bytes)")
+            
+            # Educational note
+            if any('html' in f for f in generated_files):
+                print(f"\n{Colors.CYAN}💡 Pro Tip:{Colors.ENDC}")
+                print("  Open the HTML report in your browser for interactive learning content!")
+                print("  It includes remediation guidance, code examples, and security best practices.")
+                print(f"  Location: {results_dir.absolute()}")
             
         except Exception as e:
-            print(f"Error saving results: {str(e)}")
+            print(f"{Colors.RED}[-]{Colors.ENDC} Error saving results: {str(e)}")
+            
+    def _create_basic_html_report(self, html_path):
+        """Create a basic HTML report when educational reporter is not available."""
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReconScan Security Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+        .container {{ max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+        .header {{ text-align: center; border-bottom: 2px solid #2196F3; padding-bottom: 20px; margin-bottom: 30px; }}
+        .success {{ color: #4CAF50; font-size: 24px; margin: 20px 0; }}
+        .info {{ background: #E3F2FD; padding: 20px; border-radius: 5px; margin: 20px 0; }}
+        .scan-info {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }}
+        .scan-detail {{ background: #F8F9FA; padding: 15px; border-radius: 5px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ ReconScan Security Report</h1>
+            <p>Target: {self.results.get('scan_info', {}).get('target', 'Unknown')}</p>
+        </div>
+        
+        <div class="success">
+            ✅ No vulnerabilities detected
+        </div>
+        
+        <div class="info">
+            <h3>🎯 Scan Summary</h3>
+            <p>Your target appears to be properly secured against the tested attack vectors.</p>
+        </div>
+        
+        <div class="scan-info">
+            <div class="scan-detail">
+                <h4>📊 Scan Information</h4>
+                <p><strong>Duration:</strong> {self.results.get('scan_info', {}).get('duration', 'Unknown')}</p>
+                <p><strong>Modules:</strong> {', '.join(self.results.get('scan_info', {}).get('modules_used', []))}</p>
+            </div>
+            <div class="scan-detail">
+                <h4>🔒 Security Status</h4>
+                <p><strong>Total Vulnerabilities:</strong> 0</p>
+                <p><strong>Security Level:</strong> <span style="color: #4CAF50;">Good</span></p>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>📚 Additional Resources</h3>
+            <p>For comprehensive educational security reports with learning content, ensure all ReconScan components are properly installed.</p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+        
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
     
     def _load_scan_config(self):
         """Load scan configuration from file with caching for better performance."""
@@ -671,13 +798,18 @@ class ScanCommand:
         print("\nOptions:")
         print("  --modules <list>    Comma-separated list of modules to run")
         print("                      Available: " + ", ".join(self.available_modules.keys()))
-        print("  --output <file>     Save results to file (JSON format)")
+        print("  --output <file>     Save results in multiple formats (.txt, .json, .html)")
         print("  --threads <num>     Number of concurrent threads (default: 5)")
         print("  --timeout <sec>     HTTP timeout in seconds (default: 10)")
         print("  --verbose           Enable verbose output (default)")
         print("  --quiet             Disable verbose output")
+        print("\nOutput Formats:")
+        print("  When using --output results, generates in results/ directory:")
+        print("    • results.txt  - Traditional formatted scan results")
+        print("    • results.json - Structured data for automation/tools")
+        print("    • results.html - Interactive educational security report")
         print("\nExamples:")
         print("  scan https://example.com")
         print("  scan https://example.com --modules sqli,xss,headers")
-        print("  scan https://example.com --output results.txt --threads 10")
+        print("  scan https://example.com --output results --threads 10")
         print("  scan https://example.com --modules lfi,cmdinjection --quiet")

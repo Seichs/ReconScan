@@ -1,0 +1,410 @@
+{
+  "scan_info": {
+    "target": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+    "start_time": "2025-06-27 21:31:23",
+    "modules": [
+      "sqli"
+    ],
+    "scanner_version": "0.3.01-dev",
+    "duration": "147.13s"
+  },
+  "vulnerabilities": [
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=1",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/artists.php?artist=1",
+      "method": "GET",
+      "parameter": "artist (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'artist (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+      "method": "GET",
+      "parameter": "cat (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'cat (GET)' using boolean blind technique. Database type identified as MYSQL. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": false,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Error-based)",
+      "severity": "Medium",
+      "confidence": 0.5499999999999999,
+      "url": "http://testphp.vulnweb.com/product.php?pic=2",
+      "method": "POST",
+      "parameter": "price (POST)",
+      "payload": "\" AND CAST((SELECT database()) AS int)#",
+      "evidence": [
+        "Database error detected: Warning.*mysql_.*...",
+        "AI validation: 0.80"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'price (POST)' using error based technique. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "High - Error-based data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper error handling to prevent information disclosure; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "unknown",
+      "validation_passed": false,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (UNION query)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=2",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " UNION SELECT 1,2,3--",
+      "evidence": [
+        "UNION indicator: union.*select",
+        "Database information detected",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using union based technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "High - Direct data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=3",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=4",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=5",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/product.php?pic=7",
+      "method": "GET",
+      "parameter": "pic (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'pic (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/artists.php?artist=2",
+      "method": "GET",
+      "parameter": "artist (GET)",
+      "payload": " AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'artist (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/search.php?test=query?searchFor=test",
+      "method": "GET",
+      "parameter": "test (GET)",
+      "payload": "'  AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'test (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    },
+    {
+      "type": "SQL Injection (Boolean-based blind)",
+      "severity": "High",
+      "confidence": 0.6,
+      "url": "http://testphp.vulnweb.com/search.php?test=query?goButton=test",
+      "method": "GET",
+      "parameter": "test (GET)",
+      "payload": "'  AND LEN(DATABASE())>0#",
+      "evidence": [
+        "Boolean indicator: true",
+        "Boolean indicator: false",
+        "Conditional logic in payload",
+        "AI validation: 0.70"
+      ],
+      "description": "SQL injection vulnerability detected in parameter 'test (GET)' using boolean blind technique. Database type identified as MYSQL. Vulnerability confirmed through validation testing. This vulnerability allows attackers to manipulate SQL queries and potentially access or modify database contents.",
+      "impact": "Medium - Blind data extraction possible",
+      "recommendation": "Use parameterized queries or prepared statements; Implement proper input validation and sanitization; Apply the principle of least privilege for database accounts; Enable database query logging and monitoring; Consider using an ORM framework with built-in SQL injection protection",
+      "database_type": "mysql",
+      "validation_passed": true,
+      "scan_metadata": {
+        "scan_mode": "thorough",
+        "techniques_tested": [
+          "error_based",
+          "boolean_blind",
+          "time_based",
+          "union_based"
+        ],
+        "ai_validated": true
+      }
+    }
+  ],
+  "summary": {
+    "total_vulnerabilities": 12,
+    "by_severity": {
+      "Critical": 0,
+      "High": 11,
+      "Medium": 1,
+      "Low": 0
+    },
+    "by_type": {
+      "SQL Injection (Boolean-based blind)": 10,
+      "SQL Injection (Error-based)": 1,
+      "SQL Injection (UNION query)": 1
+    },
+    "grouped_vulnerabilities": {
+      "SQL Injection": {
+        "count": 12,
+        "subtypes": {
+          "SQL Injection (Boolean-based blind)": 10,
+          "SQL Injection (Error-based)": 1,
+          "SQL Injection (UNION query)": 1
+        },
+        "examples": [
+          {
+            "url": "http://testphp.vulnweb.com/product.php?pic=1",
+            "type": "SQL Injection (Boolean-based blind)",
+            "severity": "High"
+          },
+          {
+            "url": "http://testphp.vulnweb.com/artists.php?artist=1",
+            "type": "SQL Injection (Boolean-based blind)",
+            "severity": "High"
+          },
+          {
+            "url": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+            "type": "SQL Injection (Boolean-based blind)",
+            "severity": "High"
+          }
+        ]
+      }
+    }
+  }
+}

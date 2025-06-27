@@ -1,0 +1,1482 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Security Assessment Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header Styles */
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        
+        /* Navigation */
+        .nav { background: #f8f9fa; padding: 15px 0; margin-bottom: 30px; border-radius: 8px; }
+        .nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 20px; }
+        .nav a { text-decoration: none; color: #495057; padding: 8px 16px; border-radius: 4px; transition: all 0.3s; }
+        .nav a:hover { background: #e9ecef; color: #007bff; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden; }
+        .card-header { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+        .card-body { padding: 25px; }
+        .card-title { font-size: 1.5em; margin-bottom: 10px; color: #2c3e50; }
+        
+        /* Severity Badges */
+        .severity { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; text-transform: uppercase; }
+        .severity.critical { background: #fee2e2; color: #dc2626; }
+        .severity.high { background: #fed7aa; color: #ea580c; }
+        .severity.medium { background: #fef3c7; color: #d97706; }
+        .severity.low { background: #d1fae5; color: #059669; }
+        .severity.info { background: #dbeafe; color: #0284c7; }
+        
+        /* Progress Bars */
+        .progress { background: #e9ecef; border-radius: 4px; height: 8px; margin: 10px 0; }
+        .progress-bar { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        
+        /* Code Blocks */
+        .code-block { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 20px; margin: 15px 0; }
+        .code-block pre { font-family: 'Courier New', monospace; font-size: 0.9em; overflow-x: auto; }
+        .code-vulnerable { border-left: 4px solid #dc2626; }
+        .code-secure { border-left: 4px solid #059669; }
+        
+        /* Learning Elements */
+        .learning-box { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .learning-box h4 { color: #0284c7; margin-bottom: 10px; }
+        
+        /* Knowledge Check */
+        .knowledge-check { background: #fefce8; border: 1px solid #eab308; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .knowledge-check h4 { color: #ca8a04; margin-bottom: 15px; }
+        
+        /* Risk Matrix */
+        .risk-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        .risk-cell { padding: 15px; text-align: center; border-radius: 6px; font-weight: 600; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header h1 { font-size: 2em; }
+            .nav ul { flex-direction: column; }
+            .risk-matrix { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .nav { display: none; }
+            .card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+            
+<div class="header">
+    <div class="container">
+        <h1>🎓 Educational Security Assessment Report</h1>
+        <p>Comprehensive vulnerability analysis with learning resources and remediation guidance</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul>
+            <li><a href="#executive-summary">Executive Summary</a></li>
+            <li><a href="#vulnerabilities">Vulnerabilities</a></li>
+            <li><a href="#remediation">Remediation Guide</a></li>
+            <li><a href="#learning-resources">Learning Resources</a></li>
+            <li><a href="#compliance">Compliance</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Executive Summary -->
+    <section id="executive-summary" class="card">
+        <div class="card-header">
+            <h2 class="card-title">📊 Executive Summary</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Scan Target:</strong> http://testphp.vulnweb.com/listproducts.php?cat=1</p>
+            <p><strong>Scan Date:</strong> 2025-06-27 21:33:50</p>
+            <p><strong>Total Vulnerabilities:</strong> 12</p>
+            
+            <div style="margin: 20px 0;">
+                <h3>Risk Distribution</h3>
+                <div class="risk-matrix">
+                    <div class="risk-cell" style="background: #fee2e2; color: #dc2626;">
+                        Critical: 12
+                    </div>
+                    <div class="risk-cell" style="background: #fed7aa; color: #ea580c;">
+                        High: 0
+                    </div>
+                    <div class="risk-cell" style="background: #fef3c7; color: #d97706;">
+                        Medium: 0
+                    </div>
+                    <div class="risk-cell" style="background: #d1fae5; color: #059669;">
+                        Low: 0
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Vulnerabilities Section -->
+    <section id="vulnerabilities">
+        <h2 style="margin: 30px 0 20px 0;">🔍 Detailed Vulnerability Analysis</h2>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=1</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-001">
+                        <label><input type="radio" name="qVULN-001" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-001" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-001" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-001" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-001')">Show Answer</button>
+                    <div id="answer-VULN-001" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/artists.php?artist=1</p>
+                <p><strong>Parameter:</strong> artist (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-002">
+                        <label><input type="radio" name="qVULN-002" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-002" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-002" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-002" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-002')">Show Answer</button>
+                    <div id="answer-VULN-002" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/listproducts.php?cat=1</p>
+                <p><strong>Parameter:</strong> cat (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-003">
+                        <label><input type="radio" name="qVULN-003" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-003" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-003" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-003" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-003')">Show Answer</button>
+                    <div id="answer-VULN-003" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=2</p>
+                <p><strong>Parameter:</strong> price (POST)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-004">
+                        <label><input type="radio" name="qVULN-004" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-004" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-004" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-004" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-004')">Show Answer</button>
+                    <div id="answer-VULN-004" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=2</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-005">
+                        <label><input type="radio" name="qVULN-005" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-005" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-005" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-005" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-005')">Show Answer</button>
+                    <div id="answer-VULN-005" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=3</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-006">
+                        <label><input type="radio" name="qVULN-006" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-006" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-006" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-006" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-006')">Show Answer</button>
+                    <div id="answer-VULN-006" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=4</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-007">
+                        <label><input type="radio" name="qVULN-007" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-007" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-007" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-007" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-007')">Show Answer</button>
+                    <div id="answer-VULN-007" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=5</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-008">
+                        <label><input type="radio" name="qVULN-008" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-008" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-008" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-008" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-008')">Show Answer</button>
+                    <div id="answer-VULN-008" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/product.php?pic=7</p>
+                <p><strong>Parameter:</strong> pic (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-009">
+                        <label><input type="radio" name="qVULN-009" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-009" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-009" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-009" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-009')">Show Answer</button>
+                    <div id="answer-VULN-009" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/artists.php?artist=2</p>
+                <p><strong>Parameter:</strong> artist (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-010">
+                        <label><input type="radio" name="qVULN-010" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-010" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-010" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-010" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-010')">Show Answer</button>
+                    <div id="answer-VULN-010" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/search.php?test=query?searchFor=test</p>
+                <p><strong>Parameter:</strong> test (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-011">
+                        <label><input type="radio" name="qVULN-011" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-011" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-011" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-011" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-011')">Show Answer</button>
+                    <div id="answer-VULN-011" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">SQL Injection</h3>
+                <span class="severity critical">CRITICAL</span>
+            </div>
+            <div class="card-body">
+                <p><strong>URL:</strong> http://testphp.vulnweb.com/search.php?test=query?goButton=test</p>
+                <p><strong>Parameter:</strong> test (GET)</p>
+                <p><strong>OWASP Category:</strong> A03:2021 – Injection</p>
+                <p><strong>CWE:</strong> CWE-89, CWE-564, CWE-943</p>
+                
+                <div class="learning-box">
+                    <h4>🎓 What is this vulnerability?</h4>
+                    <p>SQL injection occurs when user input is incorrectly filtered or insufficiently sanitized, allowing attackers to execute arbitrary SQL commands on the database.</p>
+                    <details>
+                        <summary>Technical Explanation</summary>
+                        <div style="margin-top: 10px; white-space: pre-line;">
+SQL injection vulnerabilities arise when applications dynamically construct SQL queries using 
+user-supplied input without proper validation or parameterization. Attackers can manipulate 
+these inputs to alter the intended SQL logic, potentially gaining unauthorized access to data, 
+modifying database contents, or executing administrative operations.
+
+The vulnerability stems from the fundamental confusion between code and data in SQL queries. 
+When user input is directly concatenated into SQL strings, the database engine cannot 
+distinguish between the intended query structure and malicious input that changes the query's 
+logic.
+                </div>
+                    </details>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>💼 Business Impact</h4>
+                    <div style="white-space: pre-line;">
+SQL injection represents one of the most severe security vulnerabilities, with potential impacts including:
+
+• **Data Breach**: Complete database compromise exposing sensitive customer information, financial records, and proprietary data
+• **Financial Loss**: Direct monetary theft, regulatory fines (GDPR, CCPA), legal costs, and reputation damage
+• **Business Disruption**: System downtime, data corruption, and loss of customer trust
+• **Compliance Violations**: Failure to meet regulatory requirements (PCI DSS, HIPAA, SOX)
+• **Competitive Disadvantage**: Loss of intellectual property and trade secrets
+                </div>
+                </div>
+                
+                <div class="learning-box">
+                    <h4>🛠️ How to Fix This</h4>
+                    <ol>
+                        <li><strong>Implement Parameterized Queries:</strong> Use prepared statements or parameterized queries to separate SQL logic from data</li><li><strong>Input Validation:</strong> Validate and sanitize all user inputs before processing</li><li><strong>Principle of Least Privilege:</strong> Configure database user with minimal required permissions</li><li><strong>Error Handling:</strong> Implement proper error handling to prevent information disclosure</li>
+                    </ol>
+                </div>
+                
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (python)</h5>
+                    <pre># VULNERABLE CODE
+query = &quot;SELECT * FROM users WHERE id = &quot; + user_id
+cursor.execute(query)</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (python)</h5>
+                    <pre># SECURE CODE
+query = &quot;SELECT * FROM users WHERE id = %s&quot;
+cursor.execute(query, (user_id,))</pre>
+                    <p><em>Use parameterized queries to prevent SQL injection</em></p>
+                </div>
+                
+                <div class="code-block code-vulnerable">
+                    <h5>❌ Vulnerable Code (java)</h5>
+                    <pre>// VULNERABLE CODE
+String query = &quot;SELECT * FROM users WHERE name = &#x27;&quot; + userName + &quot;&#x27;&quot;;
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</pre>
+                </div>
+                <div class="code-block code-secure">
+                    <h5>✅ Secure Code (java)</h5>
+                    <pre>// SECURE CODE
+String query = &quot;SELECT * FROM users WHERE name = ?&quot;;
+PreparedStatement pstmt = connection.prepareStatement(query);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();</pre>
+                    <p><em>Use PreparedStatement to safely handle user input</em></p>
+                </div>
+                
+                
+                
+                <div class="knowledge-check">
+                    <h4>🧠 Knowledge Check</h4>
+                    <p><strong>Q:</strong> What is the primary defense against SQL injection?</p>
+                    <div id="options-VULN-012">
+                        <label><input type="radio" name="qVULN-012" value="0"> Input validation only</label><br><label><input type="radio" name="qVULN-012" value="1"> Parameterized queries/prepared statements</label><br><label><input type="radio" name="qVULN-012" value="2"> Escaping special characters</label><br><label><input type="radio" name="qVULN-012" value="3"> Using stored procedures</label><br>
+                    </div>
+                    <button onclick="showAnswer('answer-VULN-012')">Show Answer</button>
+                    <div id="answer-VULN-012" style="display:none; margin-top:10px; padding:10px; background:#f0f9ff; border-radius:4px;">
+                        <strong>Answer:</strong> Parameterized queries/prepared statements<br>
+                        <strong>Explanation:</strong> Parameterized queries separate SQL logic from data, preventing injection attacks.
+                    </div>
+                </div>
+                
+                
+                <div class="learning-box">
+                    <h4>📖 Learn More</h4>
+                    <ul>
+                        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank">OWASP SQL Injection Prevention Cheat Sheet</a> - Comprehensive guide to preventing SQL injection vulnerabilities</li><li><a href="https://portswigger.net/web-security/sql-injection" target="_blank">PortSwigger Web Security Academy - SQL Injection</a> - Interactive labs and tutorials on SQL injection attacks and defenses</li><li><a href="https://sqlmap.org/" target="_blank">SQLMap Documentation</a> - Advanced SQL injection exploitation tool documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    
+    <!-- Learning Resources -->
+    <section id="learning-resources" class="card">
+        <div class="card-header">
+            <h2 class="card-title">📚 Additional Learning Resources</h2>
+        </div>
+        <div class="card-body">
+            <div class="learning-box">
+                <h4>🎯 Recommended Next Steps</h4>
+                <ul>
+                    <li>Review OWASP Top 10 vulnerabilities</li>
+                    <li>Practice with security testing tools</li>
+                    <li>Implement secure coding practices</li>
+                    <li>Set up continuous security testing</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+
+    <footer style="background: #f8f9fa; padding: 30px 0; margin-top: 50px; text-align: center; color: #6c757d;">
+        <div class="container">
+            <p>Report generated by ReconScan Educational Security Framework</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">
+                This report is for educational purposes. Use findings responsibly and in accordance with applicable laws.
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        // Interactive elements for learning
+        function toggleSection(id) {
+            const element = document.getElementById(id);
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showAnswer(id) {
+            const answer = document.getElementById(id);
+            answer.style.display = 'block';
+        }
+        
+        // Learning progress tracking
+        let learningProgress = JSON.parse(localStorage.getItem('reconScanProgress') || '{}');
+        
+        function markLearned(topic) {
+            learningProgress[topic] = new Date().toISOString();
+            localStorage.setItem('reconScanProgress', JSON.stringify(learningProgress));
+            updateProgressBars();
+        }
+        
+        function updateProgressBars() {
+            // Update progress visualization
+            const topics = Object.keys(learningProgress);
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                const topic = bar.dataset.topic;
+                if (learningProgress[topic]) {
+                    bar.style.width = '100%';
+                    bar.style.background = '#059669';
+                }
+            });
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', updateProgressBars);
+    </script>
+</body>
+</html>
+            
