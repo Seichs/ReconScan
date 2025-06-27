@@ -30,21 +30,21 @@ class RunCommand:
             'quick': {
                 'name': 'Quick Scan',
                 'description': 'Fast scan with basic vulnerability checks',
-                'modules': ['headers', 'sqli', 'xss'],
+                'modules': ['headers', 'xss'],  # SQL injection removed, will be rebuilt
                 'threads': 10,
                 'timeout': 5
             },
             'standard': {
                 'name': 'Standard Scan',
                 'description': 'Comprehensive scan with most vulnerability checks',
-                'modules': ['headers', 'sqli', 'xss', 'lfi', 'dirtraversal'],
+                'modules': ['headers', 'xss', 'lfi', 'dirtraversal'],  # SQL injection removed
                 'threads': 5,
                 'timeout': 10
             },
             'deep': {
                 'name': 'Deep Scan',
                 'description': 'Thorough scan with all vulnerability modules',
-                'modules': ['headers', 'sqli', 'xss', 'lfi', 'dirtraversal', 'cmdinjection'],
+                'modules': ['headers', 'xss', 'lfi', 'dirtraversal', 'cmdinjection'],  # SQL injection removed
                 'threads': 3,
                 'timeout': 15
             },
@@ -57,8 +57,8 @@ class RunCommand:
             },
             'injection': {
                 'name': 'Injection Tests',
-                'description': 'Focus on injection vulnerabilities',
-                'modules': ['sqli', 'xss', 'lfi', 'cmdinjection'],
+                'description': 'Focus on injection vulnerabilities (SQL injection being rebuilt)',
+                'modules': ['xss', 'lfi', 'cmdinjection'],  # SQL injection removed
                 'threads': 5,
                 'timeout': 10
             }

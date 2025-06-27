@@ -11,16 +11,17 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-# Import existing payload libraries
-from .payloads.sql_injection_payloads import SQLInjectionPayloads
-from .payloads.xss_payloads import XSSPayloads
-from .payloads.lfi_payloads import LFIPayloads
-from .payloads.command_injection_payloads import CommandInjectionPayloads
-from .payloads.directory_traversal_payloads import DirectoryTraversalPayloads
+# Import existing payload libraries from their new organized locations
+# Note: SQL injection payloads will be rebuilt from ground up
+# TODO: Fix circular imports - temporarily commented out
+# from ..vulnerability_scanners.xss.xss_payloads import XSSPayloads
+# from ..vulnerability_scanners.lfi.lfi_payloads import LFIPayloads
+# from ..vulnerability_scanners.command_injection.command_injection_payloads import CommandInjectionPayloads
+# from ..vulnerability_scanners.directory_traversal.directory_traversal_payloads import DirectoryTraversalPayloads
 
 class VulnerabilityType(Enum):
     """Enumeration of supported vulnerability types."""
-    SQL_INJECTION = "sqli"
+    SQL_INJECTION = "sqli"  # Will be rebuilt from ground up
     XSS = "xss"
     LFI = "lfi"
     COMMAND_INJECTION = "cmd"
@@ -71,11 +72,13 @@ class EnhancedPayloadManager:
     def __init__(self):
         """Initialize the enhanced payload manager with all vulnerability types."""
         # Initialize payload libraries
-        self.sql_payloads = SQLInjectionPayloads()
-        self.xss_payloads = XSSPayloads()
-        self.lfi_payloads = LFIPayloads()
-        self.cmd_payloads = CommandInjectionPayloads()
-        self.dt_payloads = DirectoryTraversalPayloads()
+        # Note: SQL injection payloads will be rebuilt from ground up
+        # TODO: Fix circular imports - temporarily disabled
+        self.sql_payloads = None  # Will be rebuilt
+        self.xss_payloads = None  # XSSPayloads()
+        self.lfi_payloads = None  # LFIPayloads()
+        self.cmd_payloads = None  # CommandInjectionPayloads()
+        self.dt_payloads = None  # DirectoryTraversalPayloads()
         
         # WAF detection patterns
         self.waf_signatures = {
@@ -212,6 +215,10 @@ class EnhancedPayloadManager:
                                        context: PayloadContext) -> List[str]:
         """Generate payloads based on vulnerability type and context."""
         if vuln_type == VulnerabilityType.SQL_INJECTION:
+            # SQL injection payloads being rebuilt from ground up
+            if self.sql_payloads is None:
+                return []  # Will be implemented in new SQL injection system
+            
             # Get comprehensive context-aware payloads
             context_payloads = self.sql_payloads.generate_context_aware_payloads(
                 context.parameter_type, 
@@ -247,6 +254,9 @@ class EnhancedPayloadManager:
                                      waf_type: WAFType) -> List[str]:
         """Generate WAF evasion variants for a given payload."""
         if vuln_type == VulnerabilityType.SQL_INJECTION:
+            # SQL injection payloads being rebuilt from ground up
+            if self.sql_payloads is None:
+                return self._apply_generic_evasion(payload, waf_type)
             return self.sql_payloads.generate_waf_evasion_payloads(payload, waf_type.value)
         
         elif vuln_type == VulnerabilityType.XSS:
@@ -385,6 +395,10 @@ class EnhancedPayloadManager:
                                        technology: str) -> List[str]:
         """Get payloads specifically crafted for detected technologies."""
         if vuln_type == VulnerabilityType.SQL_INJECTION:
+            # SQL injection payloads being rebuilt from ground up
+            if self.sql_payloads is None:
+                return []  # Will be implemented in new SQL injection system
+            
             if technology.lower() == 'wordpress':
                 return [
                     "' UNION SELECT user_login,user_pass FROM wp_users--",

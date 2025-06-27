@@ -43,7 +43,7 @@ class ScanLimits:
 
 # Import modular scanning components
 from .scanning.false_positive_filters import FalsePositiveFilters
-from .scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
+# Note: SQL injection scanner will be rebuilt from ground up
 from .scanning.vulnerability_scanners.xss_scanner import XSSScanner
 from .scanning.vulnerability_scanners.lfi_scanner import LFIScanner
 from .scanning.vulnerability_scanners.command_injection_scanner import CommandInjectionScanner
@@ -84,7 +84,7 @@ class ScanCommand:
         
         # Available scan modules
         self.available_modules = {
-            'sqli': 'SQL Injection Detection',
+            # 'sqli': 'SQL Injection Detection',  # Will be rebuilt from ground up
             'xss': 'Cross-Site Scripting Detection', 
             'lfi': 'Local File Inclusion Detection',
             'cmdinjection': 'Command Injection Detection',
@@ -93,7 +93,7 @@ class ScanCommand:
         }
         
         # Default modules to run
-        self.default_modules = ['sqli', 'xss', 'headers']
+        self.default_modules = ['xss', 'headers']  # SQL injection removed, will be rebuilt
         
         # Scan results storage
         self.results = {
@@ -481,8 +481,9 @@ class ScanCommand:
         # Lazy import and initialize scanners
         try:
             if module_name == 'sqli':
-                from scanner.commands.scanning.vulnerability_scanners.sql_injection_scanner import SQLInjectionScanner
-                scanner = SQLInjectionScanner(self.false_positive_filters, None, self.ai_validator)
+                # SQL injection scanner removed - will be rebuilt from ground up
+                print("SQL injection scanner is being rebuilt from ground up")
+                return None
             elif module_name == 'xss':
                 from scanner.commands.scanning.vulnerability_scanners.xss_scanner import XSSScanner
                 scanner = XSSScanner(self.ai_validator)
