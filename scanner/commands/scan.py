@@ -105,18 +105,28 @@ class ScanCommand:
         Execute vulnerability scan with specified parameters.
         
         Args:
-            args (str, optional): Scan arguments (target URL and options)
+            args (str or list, optional): Scan arguments (target URL and options)
             
         Returns:
             bool: True if scan completed successfully
         """
         try:
-            if not args or not args.strip():
+            if not args:
+                self._show_usage()
+                return False
+            
+            # Handle both string and list input
+            if isinstance(args, list):
+                args_str = ' '.join(args)
+            else:
+                args_str = args.strip()
+                
+            if not args_str:
                 self._show_usage()
                 return False
             
             # Parse scan arguments
-            scan_params = self._parse_args(args.strip())
+            scan_params = self._parse_args(args_str)
             
             if not scan_params:
                 return False
@@ -484,7 +494,8 @@ class ScanCommand:
         if scanner:
             # Handle different scanner method signatures for optimal performance
             if module == 'sqli':
-                vulnerabilities = await scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose)
+                # Always use enhanced mode for SQL injection (better performance by default)
+                vulnerabilities = await scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose, enhanced_mode=True)
             elif module == 'lfi':
                 vulnerabilities = await scanner.scan(session, target, self.config, verbose)
             else:
@@ -511,7 +522,9 @@ class ScanCommand:
         try:
             if module_name == 'sqli':
                 from scanner.commands.scanning.vulnerability_scanners.sql_injection.sql_injection_scanner import SQLInjectionScanner
-                scanner = SQLInjectionScanner(ai_validator=self.ai_validator)
+                # Use enhanced concurrency by default (can be disabled by setting to False in config)
+                enhanced_mode = self.config.get('scanning', {}).get('enhanced_concurrency', True)
+                scanner = SQLInjectionScanner(ai_validator=self.ai_validator, enable_enhanced_concurrency=enhanced_mode)
             elif module_name == 'xss':
                 from scanner.commands.scanning.vulnerability_scanners.xss.xss_scanner import XSSScanner
                 scanner = XSSScanner(self.ai_validator)
@@ -670,69 +683,35 @@ class ScanCommand:
             # Get base filename without extension  
             base_name = Path(output_file).stem
             
-            generated_files = []
-            
-            print(f"\n{Colors.CYAN}[*]{Colors.ENDC} Generating multi-format reports...")
-            
-            # 1. Generate TXT report (traditional scan results)
+            # Generate TXT report
             txt_path = results_dir / f"{base_name}.txt"
-            txt_file = self._save_text_report(self.results, txt_path)
-            generated_files.append(txt_file)
-            print(f"  {Colors.GREEN}[+]{Colors.ENDC} TXT report: {txt_file}")
+            self._save_text_report(self.results, txt_path)
             
-            # 2. Generate JSON report (structured data)
+            # Generate JSON report
             json_path = results_dir / f"{base_name}.json"
             with open(json_path, 'w', encoding='utf-8') as f:
                 import json
                 json.dump(self.results, f, indent=2, ensure_ascii=False)
-            generated_files.append(str(json_path))
-            print(f"  {Colors.GREEN}[+]{Colors.ENDC} JSON report: {json_path}")
             
-            # 3. Generate HTML educational report (interactive learning)
+            # Generate HTML report
             html_path = results_dir / f"{base_name}.html"
             try:
                 reporter = EducationalSecurityReporter()
-                
-                # Extract vulnerabilities for educational enhancement
                 vulnerabilities = self.results.get('vulnerabilities', [])
                 if vulnerabilities:
-                    # Generate educational report
-                    success = reporter.generate_educational_report(
+                    reporter.generate_educational_report(
                         vulnerabilities=vulnerabilities,
                         scan_metadata=self.results.get('scan_info', {}),
                         output_path=str(html_path),
                         format_type='html'
                     )
-                    
-                    if success:
-                        generated_files.append(str(html_path))
-                        print(f"  {Colors.GREEN}[+]{Colors.ENDC} HTML educational report: {html_path}")
-                    else:
-                        print(f"  {Colors.YELLOW}[!]{Colors.ENDC} HTML report generation failed")
                 else:
-                    # Create basic HTML report even without vulnerabilities
                     self._create_basic_html_report(html_path)
-                    generated_files.append(str(html_path))
-                    print(f"  {Colors.GREEN}[+]{Colors.ENDC} HTML basic report: {html_path}")
-                    
-            except ImportError:
-                print(f"  {Colors.YELLOW}[!]{Colors.ENDC} Educational reporter not available, skipping HTML")
-            except Exception as e:
-                print(f"  {Colors.YELLOW}[!]{Colors.ENDC} HTML report error: {e}")
+            except:
+                self._create_basic_html_report(html_path)
             
-            # Summary
-            print(f"\n{Colors.BLUE}[*]{Colors.ENDC} Report generation complete!")
-            print(f"  Generated {len(generated_files)} files in results/ directory:")
-            for file_path in generated_files:
-                file_size = Path(file_path).stat().st_size
-                print(f"    • {Path(file_path).name} ({file_size:,} bytes)")
-            
-            # Educational note
-            if any('html' in f for f in generated_files):
-                print(f"\n{Colors.CYAN}[TIP]{Colors.ENDC} Pro Tip:")
-                print("  Open the HTML report in your browser for interactive learning content!")
-                print("  It includes remediation guidance, code examples, and security best practices.")
-                print(f"  Location: {results_dir.absolute()}")
+            # Clean output - just show where reports were saved
+            print(f"{Colors.GREEN}[+]{Colors.ENDC} Reports: {results_dir}/{base_name}.{{txt,json,html}}")
             
         except Exception as e:
             print(f"{Colors.RED}[-]{Colors.ENDC} Error saving results: {str(e)}")
