@@ -116,7 +116,7 @@ python scripts/ai_train.py --train-data data/training_set.json
 
 ### Basic Vulnerability Assessment
 ```bash
-python scripts/scan.py --target https://target.example.com
+python scripts/scan.py --target http://testphp.vulnweb.com/
 ```
 
 ### Advanced SQL Injection Testing
@@ -126,12 +126,12 @@ python scripts/demo_payload_crafting.py
 
 ### Injection Point Discovery
 ```bash
-python scripts/demo_injection_discovery.py --target https://api.example.com
+python scripts/demo_injection_discovery.py --target http://testphp.vulnweb.com/
 ```
 
 ### AI-Enhanced Scanning
 ```bash
-python scripts/scan.py --target https://target.example.com --ai --confidence-threshold 0.8
+python scripts/scan.py --target http://testphp.vulnweb.com/ --ai --confidence-threshold 0.8
 ```
 
 ### Professional Reporting

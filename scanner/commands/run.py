@@ -19,7 +19,7 @@ class RunCommand:
     # Command metadata - self-documenting for help system
     description = "Execute quick scans with preset configurations"
     usage = "run <preset> <target_url> [output_file]"
-    example = "run quick https://example.com results.json"
+    example = "run quick http://testphp.vulnweb.com/ results.json"
     category = "Scanning"
     
     def __init__(self):
@@ -169,10 +169,10 @@ class RunCommand:
             print(f"               Modules: {modules_str}")
         
         print("\nExamples:")
-        print("  run quick https://example.com")
-        print("  run standard https://example.com scan_results.txt")
-        print("  run deep https://testsite.local detailed_scan.txt")
-        print("  run headers https://example.com")
+        print("  run quick http://testphp.vulnweb.com/")
+        print("  run standard http://testphp.vulnweb.com/ scan_results.txt")
+        print("  run deep http://testphp.vulnweb.com/ detailed_scan.txt")
+        print("  run headers http://testphp.vulnweb.com/")
         print("  run injection https://vulnerable.site")
         
         print("\nFor custom scans, use: scan <target_url> --modules <list>")

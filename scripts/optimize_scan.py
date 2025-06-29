@@ -26,7 +26,7 @@ class ScanOptimizer:
     def __init__(self):
         self.config = get_system_config()
         
-    def test_network_performance(self, target_url="https://httpbin.org/get"):
+    def test_network_performance(self, target_url="http://testphp.vulnweb.com/"):
         """Test network performance to recommend optimal timeout settings."""
         print("🔍 Testing network performance...")
         

