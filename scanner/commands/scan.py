@@ -635,7 +635,7 @@ class ScanCommand:
                 examples = group_info['examples']
                 
                 # Main vulnerability type with count
-                print(f"\n{Colors.CYAN}[SCAN]{Colors.ENDC} {base_type}: {count} vulnerabilities")
+                print(f"\n{Colors.CYAN}[SCAN{Colors.ENDC} {base_type}: {count} vulnerabilities")
                 
                 # Show subtypes if there are multiple
                 if len(subtypes) > 1:
