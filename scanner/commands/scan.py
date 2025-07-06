@@ -494,8 +494,14 @@ class ScanCommand:
         if scanner:
             # Handle different scanner method signatures for optimal performance
             if module == 'sqli':
-                # Always use enhanced mode for SQL injection (better performance by default)
-                vulnerabilities = await scanner.scan(session, target, getattr(self, 'discovered_urls', None), verbose, enhanced_mode=True)
+                # Disable enhanced concurrency to use the reliable standard scan logic
+                vulnerabilities = await scanner.scan(
+                    session,
+                    target,
+                    getattr(self, 'discovered_urls', None),
+                    verbose,
+                    enhanced_mode=False
+                )
             elif module == 'lfi':
                 vulnerabilities = await scanner.scan(session, target, self.config, verbose)
             else:
@@ -522,9 +528,7 @@ class ScanCommand:
         try:
             if module_name == 'sqli':
                 from scanner.commands.scanning.vulnerability_scanners.sql_injection.sql_injection_scanner import SQLInjectionScanner
-                # Use enhanced concurrency by default (can be disabled by setting to False in config)
-                enhanced_mode = self.config.get('scanning', {}).get('enhanced_concurrency', True)
-                scanner = SQLInjectionScanner(ai_validator=self.ai_validator, enable_enhanced_concurrency=enhanced_mode)
+                scanner = SQLInjectionScanner(ai_validator=self.ai_validator)
             elif module_name == 'xss':
                 from scanner.commands.scanning.vulnerability_scanners.xss.xss_scanner import XSSScanner
                 scanner = XSSScanner(self.ai_validator)
