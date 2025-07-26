@@ -22,11 +22,6 @@ At the `ReconScan>` prompt:
 ReconScan> scan <target_url> [options]
 ```
 
-### Non-Interactive Mode
-```bash
-echo "scan <target_url> [options]" | python3 scripts/scan.py
-```
-
 ## 4. scan Command
 **Usage:**
 ```text

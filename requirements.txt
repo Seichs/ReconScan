@@ -1,2 +1,19 @@
+# Core dependencies
 PyYAML>=6.0
 aiohttp>=3.8.0
+
+# Priority 2 Advanced Features Dependencies
+# Anonymity and Tor integration
+stem>=1.8.0
+aiohttp-socks>=0.7.0
+pysocks>=1.7.0
+
+# CAPTCHA detection and handling
+beautifulsoup4>=4.12.0
+
+# Fingerprint obfuscation and evasion
+user-agents>=2.2.0
+
+# Optional dependencies for enhanced functionality
+pytesseract>=0.3.10  # Uncomment for OCR CAPTCHA solving
+Pillow>=9.0.0       # Uncomment for image processing
